@@ -9,42 +9,23 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, X-Fetch-Request"); // Allow X-Fetch-Request header
 
-$isFetchRequest = isset($_SERVER['HTTP_X_FETCH_REQUEST']) && $_SERVER['HTTP_X_FETCH_REQUEST'] === 'true';
-
-
-if (!$isFetchRequest) {
+$requestBody = file_get_contents('php://input');
+if(empty($requestBody)) {
+    // If the request body is empty, send a forbidden response
     $response['success'] = false;
-    $response['message'] = "Forbidden: Fetch request expected";
+    $response['message'] = "Forbidden: Empty request body";
     echo json_encode($response);
     exit;
 }
 
-if(isset($_GET['level']) && isset($_GET['alias']) && isset($_GET['steps']) && isset($_GET['time']) 
-|| isset($_POST['level']) && isset($_POST['alias']) && isset($_POST['steps']) && isset($_POST['time'])) {
+$data = json_decode($requestBody, true);
 
-    if(isset($_GET['level'])) {
-        $level = $_GET['level'];
-    } else {
-        $level = $_POST['level'];
-    }
-
-    if(isset($_GET['alias'])) {
-        $alias = urldecode($_GET['alias']);
-    } else {
-        $alias = urldecode($_POST['alias']);
-    }
-
-    if(isset($_GET['steps'])) {
-        $steps = $_GET['steps'];
-    } else {
-        $steps = $_POST['steps'];
-    }
-
-    if(isset($_GET['time'])) {
-        $time = urldecode($_GET['time']);
-    } else {
-        $time = urldecode($_POST['time']);
-    }
+// Extract data from the JSON object
+if(isset($data['level']) && isset($data['alias']) && isset($data['steps']) && isset($data['time'])) {
+    $level = $data['level'];
+    $alias = urldecode($data['alias']);
+    $steps = $data['steps'];
+    $time = urldecode($data['time']);
 
     try {
     // Check if a record exists for the provided alias on the specified level
@@ -70,7 +51,7 @@ if(isset($_GET['level']) && isset($_GET['alias']) && isset($_GET['steps']) && is
     } else {
         // If existing record, check if new score is better
 
-        if ($steps < $existingScore['steps'] || ($steps == $existingScore['steps'] && $time < $existingScore['time'])) {
+        if ($steps < $existingScore['steps'] || ($steps == $existingScore['steps'] && compareTimes($time, $existingScore['time']))) {
             // If new score is better, update the existing record
 
             // Update the existing high score
@@ -89,12 +70,46 @@ if(isset($_GET['level']) && isset($_GET['alias']) && isset($_GET['steps']) && is
             $response['success'] = true;
             $response['message'] = "No high score added or updated";
         }
+
+ 
     }
+
+
+    // Function to compare times in the format '0:423'
+     function compareTimes($newTime, $existingTime) {
+        $newTimeParts = explode(':', $newTime);
+        $existingTimeParts = explode(':', $existingTime);
+
+        // Extract seconds and milliseconds
+        $newSeconds = (int)$newTimeParts[0];
+        $newMilliseconds = isset($newTimeParts[1]) ? (int)$newTimeParts[1] : 0;
+
+        $existingSeconds = (int)$existingTimeParts[0];
+        $existingMilliseconds = isset($existingTimeParts[1]) ? (int)$existingTimeParts[1] : 0;
+
+        // Compare seconds
+        if ($newSeconds < $existingSeconds) {
+            return true;
+        } elseif ($newSeconds > $existingSeconds) {
+            return false;
+        }
+
+        // If seconds are equal, compare milliseconds
+        return $newMilliseconds < $existingMilliseconds;
+    }
+
+
+
+    $stmt = $pdo->prepare("DELETE FROM highscore WHERE time = '' OR steps = 0");
+    $stmt->execute();
+
+
+
+
 } catch (PDOException $e) {
     $response['success'] = false;
     $response['message'] = "Error: " . $e->getMessage();
 }
-
 
 
     } else {

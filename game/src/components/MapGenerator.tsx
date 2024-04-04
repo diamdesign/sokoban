@@ -151,12 +151,13 @@ function Emptydivs({
                     {row.map((item: any, j: number) => (
                         <div
                             key={j}
-                            className={`grid-item-editor ${item.type && item.type !== 'empty'
-                                ? item.type === 'player'
-                                    ? 'ground player-down playerwalkdown'
-                                    : 'ground ' + item.type
-                                : item.type
-                                }`}
+                            className={`grid-item-editor ${
+                                item.type && item.type !== 'empty'
+                                    ? item.type === 'player'
+                                        ? 'ground player-down playerwalkdown'
+                                        : 'ground ' + item.type
+                                    : item.type
+                            }`}
                             data-id={item.id}
                             onClick={(e) => handleGridClick(e, i, j)}
                             onMouseOver={(e) => handleGridClick(e, i, j)}
@@ -255,19 +256,17 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
         console.log(savedMapData);
     }, [savedMapData]);
 
-
     function generateMap(): void {
         const data: { mapdata: string[][]; solution: string[][] } = {
             mapdata: [],
             solution: [],
         };
-    let playerAmount = 0;
-    let boxAmount = 0;
-    let boxIndex = 0;
-    let specialBoxIndicator = 0;
-    let specialBoxAmount = 0;
-    let doorAmount = 0;
-
+        let playerAmount = 0;
+        let boxAmount = 0;
+        let boxIndex = 0;
+        let specialBoxIndicator = 0;
+        let specialBoxAmount = 0;
+        let doorAmount = 0;
 
         type ClassToSymbol = {
             [key: string]: {
@@ -364,82 +363,84 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
         */
 
         function saveJsonToFile(data: any) {
-            fetch('../php/savemap.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-                .then((response) => response.json())
-                .then((result) => {
-                    // Check the status of the response
-                    if (result.success) {
-                        console.log('File saved successfully:', result.file);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://diam.se/sokoban/src/php/savemap.php');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // Custom X-Requested-With header
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            if (result.success) {
+                                console.log('File saved successfully:', result.file);
+                            } else {
+                                throw new Error('Failed to save file');
+                            }
+                        } catch (error: any) {
+                            console.error('Error parsing response:', error.message);
+                        }
                     } else {
-                        throw new Error('Failed to save file');
+                        console.error('Error saving file:', xhr.status);
                     }
-                })
-                .catch((error) => {
-                    console.error('Error saving file:', error.message);
-                });
+                }
+            };
+            xhr.send(JSON.stringify(data));
         }
 
         saveJsonToFile(mergedData);
     }
 
-
-    const handleGridClick = (
-        e: { stopPropagation: () => void; type: string },
-        i: string | number,
-        j: string | number
-    ) => {
-        e.stopPropagation();
-        // Only update the grid item if the mouse button is down and Shift is held, or if it's a click event (not a drag)
-        if ((isMouseDown && isShiftDown) || e.type === 'click') {
-            const newGridItems = [...gridItems];
-            if (selectedItem === 'player') {
-                for (const row of newGridItems) {
-                    for (let i = 0; i < row.length; i++) {
-                        if (row[i].type === 'player') {
-                            row[i] = { type: 'ground' }; // Replace the old player with ground
-                            break;
-                        }
+const handleGridClick = (
+    e: { stopPropagation: () => void; type: string },
+    i: string | number,
+    j: string | number
+) => {
+    e.stopPropagation();
+    if ((isMouseDown && isShiftDown) || e.type === 'click') {
+        const newGridItems = [...gridItems];
+        if (selectedItem === 'player') {
+            for (const row of newGridItems) {
+                for (let i = 0; i < row.length; i++) {
+                    if (row[i].type === 'player') {
+                        row[i] = { type: 'ground' };
+                        break;
                     }
                 }
             }
+        }
 
-            // Update the class of the clicked grid item based on the selected item
-            if (selectedItem === 'door' || selectedItem === 'special') {
-                const id = prompt('Enter an ID (1-9) for this item:');
-                if (id && /^[1-9]$/.test(id)) {
-                    if (selectedItem === 'door' && usedDoorIds.includes(id)) {
-                        alert('This ID is already used for another door. Please enter a unique ID.');
-                    } else if (selectedItem === 'special' && usedSpecialIds.includes(id)) {
-                        alert('This ID is already used for another special item. Please enter a unique ID.');
-                    } else {
-                        newGridItems[Number(i)][Number(j)] = { type: selectedItem, id };
-                        if (selectedItem === 'door') {
-                            setUsedDoorIds([...usedDoorIds, id]);
-                        } else {
-                            setUsedSpecialIds([...usedSpecialIds, id]);
+        if (selectedItem === 'door' || selectedItem === 'special') {
+            const id = prompt('Enter an ID (1-9) for this item:');
+            if (id && /^[1-9]$/.test(id)) {
+                if ((selectedItem === 'door' && usedDoorIds.includes(id)) || (selectedItem === 'special' && usedSpecialIds.includes(id))) {
+                    for (const row of newGridItems) {
+                        for (let i = 0; i < row.length; i++) {
+                            if (row[i].type === selectedItem && row[i].id === id) {
+                                row[i] = { type: 'empty' };
+                                break;
+                            }
                         }
                     }
+                }
+                newGridItems[Number(i)][Number(j)] = { type: selectedItem, id };
+                if (selectedItem === 'door') {
+                    setUsedDoorIds([...usedDoorIds, id]);
                 } else {
-                    alert('Invalid ID. Please enter a single digit between 1 and 9.');
+                    setUsedSpecialIds([...usedSpecialIds, id]);
                 }
             } else {
-                newGridItems[Number(i)][Number(j)] = { type: selectedItem };
+                alert('Invalid ID. Please enter a single digit between 1 and 9.');
             }
-            playSound('add', 0.4);
-            setGridItems(newGridItems);
-
-
+        } else {
+            newGridItems[Number(i)][Number(j)] = { type: selectedItem };
         }
-    };
+        playSound('add', 0.4);
+        setGridItems(newGridItems);
+    }
+};
 
-
-
+    
     //dont remove this i to lazy to fix it
     const handleGridClickBack = () => {
         // const handleGridClickBack = (e: { stopPropagation: () => void; preventDefault: () => void; }, i: string | number, j: string | number) => {
@@ -575,12 +576,12 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
     const handleHelp = () => {
         alert(
             '1. Click on the grid to place items.\n' +
-            '2. Use the toolbar/right click or 1-9Num to select an item.\n' +
-            '5. Hold Shift to place/draw multiple items.\n' +
-            "6. Click the 'Play' icon to test the map and solve it to be able to save it.\n" +
-            "7. When completing your test of the map, click 'Save' icon to download the map.\n" +
-            "8. In the test play, click 'Back' icon to go back to the map editor.\n" +
-            '9. You must have 1 player, 1 or more boxes, and the same amount of box indicators as boxes to save the map.\n'
+                '2. Use the toolbar/right click or 1-9Num to select an item.\n' +
+                '5. Hold Shift to place/draw multiple items.\n' +
+                "6. Click the 'Play' icon to test the map and solve it to be able to save it.\n" +
+                "7. When completing your test of the map, click 'Save' icon to download the map.\n" +
+                "8. In the test play, click 'Back' icon to go back to the map editor.\n" +
+                '9. You must have 1 player, 1 or more boxes, and the same amount of box indicators as boxes to save the map.\n'
         );
     };
 
@@ -701,8 +702,6 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
     );
 }
 
-
-
 // gridItems.forEach((row) => {
 //     const columns = row.querySelectorAll('.grid-item-editor');
 //     const array: string[] = [];
@@ -750,7 +749,6 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
 // });
 // saveMap(data.mapdata);
 
-
 /*
 if (playerAmount > 1 || playerAmount === 0) {
     alert('Can/must only have 1 player, please fix...');
@@ -771,7 +769,6 @@ if (boxIndex === 0 || boxIndex !== boxAmount) {
     return;
 }
 */
-
 
 // const handleGridClick = (
 //     e: { stopPropagation: () => void; type: string },

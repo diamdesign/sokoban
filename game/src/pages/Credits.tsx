@@ -45,7 +45,10 @@ export function Credits({ onPageChange }: SelectPageProps) {
                             Fredrik Berglund
                         </a>
                     </h5>
-                    <h5>Andreas Isidorsson</h5>
+
+                    <h5><a href="https://github.com/Cloticc" target="_blank" onMouseOver={handleMouseOver}>
+                            Andreas Isidorsson
+                        </a></h5>
                     <h5><a href="https://www.linkedin.com/in/alireza-kt/" target="_blank" onMouseOver={handleMouseOver}>
                             Alireza Kafshdartoosi
                         </a></h5>

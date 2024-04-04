@@ -41,58 +41,64 @@ export function Highscore() {
 
         setTimeout(() => {
             const encodedAlias = encodeURIComponent(alias);
+            // const encodedTime = highestScores[level]
+            //     ? encodeURIComponent(formatElapsedTime(highestScores[level].elapsedTime))
+            //     : '';
+            // const encodedSteps = highestScores[level]
+            //     ? encodeURIComponent(highestScores[level].score)
+            //     : '';
             const encodedTime = encodeURIComponent(
                 formatElapsedTime(highestScores[level].elapsedTime)
             );
             const encodedSteps = encodeURIComponent(highestScores[level].score);
+
             const url = `https://diam.se/sokoban/src/php/savehighscore.php?level=${
                 level + 1
             }&alias=${encodedAlias}&time=${encodedTime}&steps=${encodedSteps}`;
 
             const xhr = new XMLHttpRequest();
             xhr.open('POST', url);
-            xhr.setRequestHeader('X-Fetch-Request', 'true'); // Custom header
+            xhr.setRequestHeader('Content-Type', 'application/json'); // Set content type to JSON
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        try {
-                            const data = JSON.parse(xhr.responseText);
-                            console.log('High score saved successfully:', data);
-
-                            const getHighScoreUrl = `https://diam.se/sokoban/src/php/gethighscore.php?level=${
-                                level + 1
-                            }`;
-                            const xhr2 = new XMLHttpRequest();
-                            xhr2.open('POST', getHighScoreUrl);
-                            xhr2.onreadystatechange = function () {
-                                if (xhr2.readyState === XMLHttpRequest.DONE) {
-                                    if (xhr2.status === 200) {
-                                        try {
-                                            const result = JSON.parse(xhr2.responseText);
-                                            console.log(result.highscores);
-                                            setHighscoreDB(result.highscores || []);
-                                        } catch (error) {
-                                            console.error(
-                                                'Error parsing high score response:',
-                                                error
-                                            );
-                                        }
-                                    } else {
-                                        console.error('Error fetching high score:', xhr2.status);
-                                    }
-                                }
-                            };
-                            xhr2.send();
-                        } catch (error) {
-                            console.error('Error parsing save high score response:', error);
-                        }
+                        const data = JSON.parse(xhr.responseText);
+                        console.log('High score saved successfully:', data);
                     } else {
                         console.error('Error saving high score:', xhr.status);
                     }
                 }
             };
             xhr.send();
-        }, 150);
+
+            setTimeout(() => {
+                try {
+                    const getHighScoreUrl = `https://diam.se/sokoban/src/php/gethighscore.php?level=${
+                        level + 1
+                    }`;
+                    const xhr2 = new XMLHttpRequest();
+                    xhr2.open('POST', getHighScoreUrl);
+                    xhr2.onreadystatechange = function () {
+                        if (xhr2.readyState === XMLHttpRequest.DONE) {
+                            if (xhr2.status === 200) {
+                                try {
+                                    const result = JSON.parse(xhr2.responseText);
+                                    console.log(result.highscores);
+                                    setHighscoreDB(result.highscores || []);
+                                } catch (error) {
+                                    console.error('Error parsing high score response:', error);
+                                }
+                            } else {
+                                console.error('Error fetching high score:', xhr2.status);
+                            }
+                        }
+                    };
+                    xhr2.send();
+                } catch (error) {
+                    console.error('Error parsing save high score response:', error);
+                }
+            }, 250);
+        }, 250);
     }, []); // Add level to the dependency array
 
     useEffect(() => {
@@ -184,20 +190,18 @@ export function Highscore() {
                             </div>
                         </div>
                     ))}
-
-                {/* Display high scores from the database */}
-                {highscoreDB &&
-                    highscoreDB.map((row, index) => (
-                        <div key={index} className="listhdb">
-                            <div className="row">
+                <div className="listhdb">
+                    {/* Display high scores from the database */}
+                    {highscoreDB &&
+                        highscoreDB.map((row, index) => (
+                            <div className="row" key={index}>
                                 <div>{index + 1}</div>
                                 <div>{row.alias}</div>
                                 <div>{row.steps}</div>
                                 <div>{row.time}</div>
                             </div>
-                        </div>
-                    ))}
-
+                        ))}
+                </div>
                 <div className="content-container">
                     <button
                         id="btn-replay-again"

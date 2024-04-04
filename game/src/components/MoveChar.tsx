@@ -20,11 +20,9 @@ interface MoveCharProps {
     setSpecialBoxIndicator: (positions: { x: number; y: number }[]) => void;
     specialDoor: { x: number; y: number }[];
     setSpecialDoor: (positions: { x: number; y: number }[]) => void;
-
 }
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
-
 
 const directionMap: Record<Direction, { x: number; y: number }> = {
     UP: { x: 0, y: -1 },
@@ -83,10 +81,12 @@ export function MoveChar({
         setYouLost,
         setPlayerGroundFloor,
         mapGeneratorRendering,
-    } = useContext(MyContext)
+    } = useContext(MyContext);
 
     function handleDeath(string?: string | null) {
-        if (string === undefined || string === null || string === '') { /* empty */ } else if (string === 'mine') {
+        if (string === undefined || string === null || string === '') {
+            /* empty */
+        } else if (string === 'mine') {
             playSound('mine', 0.8);
         }
         setDisableControls(true);
@@ -102,7 +102,9 @@ export function MoveChar({
     }
 
     function handleLost(string?: string | null) {
-        if (string === undefined || string === null || string === '') { /* empty */ } else if (string === 'boxexplode') {
+        if (string === undefined || string === null || string === '') {
+            /* empty */
+        } else if (string === 'boxexplode') {
             playSound('boxexplode', 0.8);
         }
         setDisableControls(true);
@@ -141,9 +143,7 @@ export function MoveChar({
         setSolution([...solution, newSolution]);
     };
 
-    useEffect(() => {
-    }, [solution]);
-
+    useEffect(() => {}, [solution]);
 
     const saveSolutionToJson = () => {
         const Solution = solution.map((obj) => ({
@@ -155,10 +155,12 @@ export function MoveChar({
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = `map${level + 1}.json`;
-        a.click();
+        // TODO: Uncomment this line to automatically download the solution filename
+        // a.click();
         a.remove();
         window.URL.revokeObjectURL(a.href);
     };
+    
     const handleHistoryUndo = useCallback(() => {
         if (history.length > 1) {
             const prevState = history[history.length - 1];
@@ -222,7 +224,6 @@ export function MoveChar({
         setWonGame(true);
     }, []);
 
-
     const isWithinBoundaries = (position: { x: number; y: number }) => {
         return (
             position.x >= 0 &&
@@ -233,9 +234,11 @@ export function MoveChar({
     };
 
     const isNotWall = (newMapData: string[][], position: { x: number; y: number }) => {
-        return newMapData[position.y][position.x] !== '#' &&
+        return (
+            newMapData[position.y][position.x] !== '#' &&
             newMapData[position.y][position.x].startsWith('D') === false &&
-            newMapData[position.y][position.x].startsWith('S') === false;
+            newMapData[position.y][position.x].startsWith('S') === false
+        );
     };
 
     const isEmptySpace = (newMapData: string[][], position: { x: number; y: number }) => {
@@ -250,7 +253,6 @@ export function MoveChar({
         return newMapData[position.y][position.x] === 'W';
     };
 
-
     const movePlayer = (newMapData: string[][], newPosition: { x: number; y: number }) => {
         // Check if the new player position has a token
         if (newMapData[newPosition.y][newPosition.x] === 'T') {
@@ -263,11 +265,15 @@ export function MoveChar({
         }
 
         if (
-            indicatorPositions.some((pos) => pos.x === playerPosition.x && pos.y === playerPosition.y)
+            indicatorPositions.some(
+                (pos) => pos.x === playerPosition.x && pos.y === playerPosition.y
+            )
         ) {
             newMapData[playerPosition.y][playerPosition.x] = 'I';
         } else if (
-            specialBoxIndicator.some((pos) => pos.x === playerPosition.x && pos.y === playerPosition.y)
+            specialBoxIndicator.some(
+                (pos) => pos.x === playerPosition.x && pos.y === playerPosition.y
+            )
         ) {
             newMapData[playerPosition.y][playerPosition.x] = 'S';
         } else {
@@ -308,7 +314,6 @@ export function MoveChar({
             newMapData[playerPosition.y][playerPosition.x] = ',';
         }
 
-
         newMapData[newPosition.y][newPosition.x] = 'P';
         setCounter(counter + 1);
         setMapData(newMapData);
@@ -333,7 +338,11 @@ export function MoveChar({
         // Check if the new position of the special box is a special indicator
         const specialIndicator = newMapData[beyondBoxPosition.y][beyondBoxPosition.x];
         let doorPosition = null;
-        if (specialBoxIndicator.some((pos) => pos.x === beyondBoxPosition.x && pos.y === beyondBoxPosition.y)) {
+        if (
+            specialBoxIndicator.some(
+                (pos) => pos.x === beyondBoxPosition.x && pos.y === beyondBoxPosition.y
+            )
+        ) {
             // If it is, find the corresponding door
             const doorNumber = specialIndicator.slice(1);
             const correspondingDoor = 'D' + doorNumber;
@@ -354,7 +363,6 @@ export function MoveChar({
         } else {
             newMapData[beyondBoxPosition.y][beyondBoxPosition.x] = 'O';
         }
-
 
         playSound('pushbox', 0.4);
         playSound('walk', 0.3);
@@ -380,9 +388,6 @@ export function MoveChar({
             triggerDoor(doorPosition, newMapData);
         }
     };
-
-
-
 
     function setDivClass(positionX: number, positionY: number, classname: string) {
         const gridContainer = document.querySelector('.grid-container');
@@ -463,13 +468,11 @@ export function MoveChar({
                             (pos) => pos.x === newPosition.x && pos.y === newPosition.y
                         );
 
-
                         if (isSpecialBoxOnIndicator) {
                             // If the special box is on the indicator, don't allow the player to move it
                             return;
                         }
                     }
-
 
                     // console.log('Special Box:', specialBox);
                     // console.log('Special Box Index:', specialBoxIndex);
@@ -484,14 +487,20 @@ export function MoveChar({
                             (newMapData[beyondBoxPosition.y][beyondBoxPosition.x] === ',' ||
                                 newMapData[beyondBoxPosition.y][beyondBoxPosition.x] === 'I' ||
                                 newMapData[beyondBoxPosition.y][beyondBoxPosition.x] === 'T' ||
-                                (newMapData[beyondBoxPosition.y][beyondBoxPosition.x].startsWith('S') && newMapData[newPosition.y][newPosition.x] === 'O')) &&
+                                (newMapData[beyondBoxPosition.y][beyondBoxPosition.x].startsWith(
+                                    'S'
+                                ) &&
+                                    newMapData[newPosition.y][newPosition.x] === 'O')) &&
                             !newMapData[beyondBoxPosition.y][beyondBoxPosition.x].startsWith('D')
                         ) {
-
-
                             if (specialBoxIndex !== -1) {
                                 //Move the special box
-                                moveSpecialBox(newMapData, newPosition, beyondBoxPosition, specialBoxIndex);
+                                moveSpecialBox(
+                                    newMapData,
+                                    newPosition,
+                                    beyondBoxPosition,
+                                    specialBoxIndex
+                                );
                                 // console.log('move special box');
                             } else {
                                 //Move the normal box
@@ -671,7 +680,7 @@ export function MoveChar({
             stopGame();
             setWonGame(true);
             addToSolution(mapData, direction);
-            !mapGeneratorRendering && saveSolutionToJson();
+            // !mapGeneratorRendering && saveSolutionToJson();
             setLevelCompleted(true);
             setCurrentLevel(level.toString());
         }
