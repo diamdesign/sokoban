@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 
 import { MyContext } from './../ContextProvider/ContextProvider';
 import { formatElapsedTime } from '../utils/TimeUtils';
@@ -26,39 +26,44 @@ export function Highscore() {
 
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const saveHighScoreTimeoutRef = useRef<number | null>(null);
+
+    const saveHighScore = () => {
+        if (!isSaving) {
+            setIsSaving(true);
+            const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', url);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log('High score saved successfully');
+                    } else {
+                        console.error('Error saving high score:', xhr.status);
+                    }
+                    setIsSaving(false);
+                }
+            };
+            const data = {
+                level: level + 1,
+                alias: alias,
+                time: formatElapsedTime(highestScores[level]?.elapsedTime || 0),
+                steps: highestScores[level]?.score || 0,
+            };
+            const jsonData = JSON.stringify(data);
+            xhr.send(jsonData);
+        }
+    };
 
     useEffect(() => {
-        const saveHighScore = () => {
-            if (!isSaving) {
-                setIsSaving(true);
-                const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', url);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        if (xhr.status === 200) {
-                            console.log('High score saved successfully');
-                        } else {
-                            console.error('Error saving high score:', xhr.status);
-                        }
-                        setIsSaving(false);
-                    }
-                };
-                const data = {
-                    level: level + 1,
-                    alias: alias,
-                    time: formatElapsedTime(highestScores[level]?.elapsedTime || 0),
-                    steps: highestScores[level]?.score || 0,
-                };
-                const jsonData = JSON.stringify(data);
-                xhr.send(jsonData);
+        saveHighScoreTimeoutRef.current = window.setTimeout(saveHighScore, 250);
+        return () => {
+            if (saveHighScoreTimeoutRef.current) {
+                clearTimeout(saveHighScoreTimeoutRef.current);
             }
         };
-
-        const saveHighScoreTimeout = setTimeout(saveHighScore, 250);
-        return () => clearTimeout(saveHighScoreTimeout);
-    }, [level, alias, highestScores, isSaving]);
+    }, [level, alias, highestScores]);
 
     useEffect(() => {
         const getHighScore = () => {
