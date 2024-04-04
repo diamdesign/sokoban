@@ -27,6 +27,7 @@ if(isset($_GET['level']) || isset($_POST['level'])) {
                 GROUP BY alias
             ) AS t ON h.alias = t.alias AND h.steps = t.min_steps AND h.time = t.min_time
             WHERE h.level = :main_level
+            GROUP BY h.alias, h.steps, h.time
             ORDER BY h.steps ASC, h.time ASC
             LIMIT 10
         ");

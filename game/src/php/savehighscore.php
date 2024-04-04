@@ -108,6 +108,16 @@ if(empty($requestBody)) {
     $stmt = $pdo->prepare("DELETE FROM highscore WHERE time = '' OR steps = 0");
     $stmt->execute();
 
+    $stmt = $pdo->prepare("
+        DELETE h1
+        FROM highscore h1
+        INNER JOIN highscore h2 ON h1.id > h2.id
+            AND h1.alias = h2.alias
+            AND h1.steps = h2.steps
+            AND h1.time = h2.time
+    ");
+    $stmt->execute();
+
 
 } catch (PDOException $e) {
     $response['success'] = false;
