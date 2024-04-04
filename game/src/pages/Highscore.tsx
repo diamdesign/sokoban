@@ -25,12 +25,15 @@ export function Highscore() {
     } = useContext(MyContext);
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const isSavingRef = useRef(false); // Ref to track if saving is in progress
     const saveHighScoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const saveHighScore = () => {
-            if (!isSaving) {
+            if (!isSavingRef.current) {
+                // Check if saving is not already in progress
                 setIsSaving(true);
+                isSavingRef.current = true; // Set the flag to indicate saving is in progress
                 const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', url);
@@ -43,6 +46,7 @@ export function Highscore() {
                             console.error('Error saving high score:', xhr.status);
                         }
                         setIsSaving(false);
+                        isSavingRef.current = false; // Reset the flag after saving is completed
                     }
                 };
                 const data = {
@@ -72,7 +76,7 @@ export function Highscore() {
                 clearTimeout(saveHighScoreTimeoutRef.current);
             }
         };
-    }, [level, alias, highestScores, isSaving]);
+    }, [level, alias, highestScores]);
 
     useEffect(() => {
         // Fetch high score when component mounts

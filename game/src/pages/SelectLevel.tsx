@@ -195,7 +195,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
                                 return (
                                     <li
                                         key={startIndex + index}
-                                        data-mapid={mapId}
+                                        data-mapid={mapId - 1}
                                         onMouseOver={
                                             playedMaps.length >= mapId ? handleMouseOver : undefined
                                         }
