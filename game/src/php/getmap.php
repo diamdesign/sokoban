@@ -1,6 +1,10 @@
 <?php
 require("db.php");
 
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: GET"); // Adjust allowed methods as needed
+header("Access-Control-Allow-Headers: Content-Type");
+
 $response = array(); // Initialize the response array
 
 try {

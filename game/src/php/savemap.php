@@ -19,6 +19,14 @@ if (!isset($jsonData) || empty($jsonData)) {
     exit;
 }
 
+// Check if JSON data is valid
+if ($decodedData === null) {
+    $response['success'] = false;
+    $response['message'] = "Invalid JSON data in the request body";
+    echo json_encode($response);
+    exit;
+}
+/*
 // Specify the directory where JSON files are stored
 $directory = '../../assets/';
 
@@ -39,13 +47,15 @@ if (empty($files)) {
 // Increment the latest file number to generate the filename for the new file
 $newFileName = 'map' . ($latestFileNumber + 1) . '.js';
 $filePath = $directory . $newFileName;
-
+*/
 try {
     // Insert JSON data into the database
     $insertStmt = $pdo->prepare("INSERT INTO maps (mapdata) VALUES (:mapdata)");
     $insertStmt->bindParam(':mapdata', $jsonData, PDO::PARAM_STR);
     $insertStmt->execute();
 
+    $response['status'] = 'success';
+    /*
     // Save the JSON data to the new file
     if (file_put_contents($filePath, $jsonData) !== false) {
         // If successful, send success response
@@ -56,11 +66,12 @@ try {
         $response['success'] = false;
         $response['message'] = 'Failed to save JSON data to file.';
     }
+    */
 } catch (PDOException $e) {
     // If database insertion fails, send error response
     $response['success'] = false;
     $response['message'] = "Error: " . $e->getMessage();
 }
-
+header('Content-Type: application/json');
 echo json_encode($response);
 ?>

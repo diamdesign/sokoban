@@ -366,7 +366,6 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'https://diam.se/sokoban/src/php/savemap.php');
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // Custom X-Requested-With header
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -391,56 +390,58 @@ export function MapGenerator({ onPageChange }: SelectPageProps) {
         saveJsonToFile(mergedData);
     }
 
-const handleGridClick = (
-    e: { stopPropagation: () => void; type: string },
-    i: string | number,
-    j: string | number
-) => {
-    e.stopPropagation();
-    if ((isMouseDown && isShiftDown) || e.type === 'click') {
-        const newGridItems = [...gridItems];
-        if (selectedItem === 'player') {
-            for (const row of newGridItems) {
-                for (let i = 0; i < row.length; i++) {
-                    if (row[i].type === 'player') {
-                        row[i] = { type: 'ground' };
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (selectedItem === 'door' || selectedItem === 'special') {
-            const id = prompt('Enter an ID (1-9) for this item:');
-            if (id && /^[1-9]$/.test(id)) {
-                if ((selectedItem === 'door' && usedDoorIds.includes(id)) || (selectedItem === 'special' && usedSpecialIds.includes(id))) {
-                    for (const row of newGridItems) {
-                        for (let i = 0; i < row.length; i++) {
-                            if (row[i].type === selectedItem && row[i].id === id) {
-                                row[i] = { type: 'empty' };
-                                break;
-                            }
+    const handleGridClick = (
+        e: { stopPropagation: () => void; type: string },
+        i: string | number,
+        j: string | number
+    ) => {
+        e.stopPropagation();
+        if ((isMouseDown && isShiftDown) || e.type === 'click') {
+            const newGridItems = [...gridItems];
+            if (selectedItem === 'player') {
+                for (const row of newGridItems) {
+                    for (let i = 0; i < row.length; i++) {
+                        if (row[i].type === 'player') {
+                            row[i] = { type: 'ground' };
+                            break;
                         }
                     }
                 }
-                newGridItems[Number(i)][Number(j)] = { type: selectedItem, id };
-                if (selectedItem === 'door') {
-                    setUsedDoorIds([...usedDoorIds, id]);
+            }
+
+            if (selectedItem === 'door' || selectedItem === 'special') {
+                const id = prompt('Enter an ID (1-9) for this item:');
+                if (id && /^[1-9]$/.test(id)) {
+                    if (
+                        (selectedItem === 'door' && usedDoorIds.includes(id)) ||
+                        (selectedItem === 'special' && usedSpecialIds.includes(id))
+                    ) {
+                        for (const row of newGridItems) {
+                            for (let i = 0; i < row.length; i++) {
+                                if (row[i].type === selectedItem && row[i].id === id) {
+                                    row[i] = { type: 'empty' };
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    newGridItems[Number(i)][Number(j)] = { type: selectedItem, id };
+                    if (selectedItem === 'door') {
+                        setUsedDoorIds([...usedDoorIds, id]);
+                    } else {
+                        setUsedSpecialIds([...usedSpecialIds, id]);
+                    }
                 } else {
-                    setUsedSpecialIds([...usedSpecialIds, id]);
+                    alert('Invalid ID. Please enter a single digit between 1 and 9.');
                 }
             } else {
-                alert('Invalid ID. Please enter a single digit between 1 and 9.');
+                newGridItems[Number(i)][Number(j)] = { type: selectedItem };
             }
-        } else {
-            newGridItems[Number(i)][Number(j)] = { type: selectedItem };
+            playSound('add', 0.4);
+            setGridItems(newGridItems);
         }
-        playSound('add', 0.4);
-        setGridItems(newGridItems);
-    }
-};
+    };
 
-    
     //dont remove this i to lazy to fix it
     const handleGridClickBack = () => {
         // const handleGridClickBack = (e: { stopPropagation: () => void; preventDefault: () => void; }, i: string | number, j: string | number) => {
