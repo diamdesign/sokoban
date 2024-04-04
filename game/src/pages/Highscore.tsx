@@ -25,20 +25,68 @@ export function Highscore() {
     } = useContext(MyContext);
 
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        const storedScores = localStorage.getItem('highestScores');
-        if (storedScores) {
-            setHighestScores(JSON.parse(storedScores));
-        }
-        // console.log("Stored Scores: ", storedScores || "No stored scores");
+        const saveHighScore = () => {
+            if (!isSaving) {
+                setIsSaving(true);
+                const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', url);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            console.log('High score saved successfully');
+                        } else {
+                            console.error('Error saving high score:', xhr.status);
+                        }
+                        setIsSaving(false);
+                    }
+                };
+                const data = {
+                    level: level + 1,
+                    alias: alias,
+                    time: formatElapsedTime(highestScores[level]?.elapsedTime || 0),
+                    steps: highestScores[level]?.score || 0,
+                };
+                const jsonData = JSON.stringify(data);
+                xhr.send(jsonData);
+            }
+        };
 
-        playSound('leveldone', 0.3);
-        setShowGameContainer(false);
-        setMusic('ui');
-        setGameReady(false);
-        setDisableControls(true);
-    }, []); // Add level to the dependency array
+        const saveHighScoreTimeout = setTimeout(saveHighScore, 250);
+        return () => clearTimeout(saveHighScoreTimeout);
+    }, [level, alias, highestScores, isSaving]);
+
+    useEffect(() => {
+        const getHighScore = () => {
+            const getHighScoreUrl = `https://diam.se/sokoban/src/php/gethighscore.php?level=${
+                level + 1
+            }`;
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', getHighScoreUrl);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            setHighscoreDB(result.highscores || []);
+                        } catch (error) {
+                            console.error('Error parsing high score response:', error);
+                        }
+                    } else {
+                        console.error('Error fetching high score:', xhr.status);
+                    }
+                }
+            };
+            xhr.send();
+        };
+
+        const getHighScoreTimeout = setTimeout(getHighScore, 250);
+        return () => clearTimeout(getHighScoreTimeout);
+    }, [level, setHighscoreDB]);
 
     useEffect(() => {
         // Define the function to run when Enter key is pressed
