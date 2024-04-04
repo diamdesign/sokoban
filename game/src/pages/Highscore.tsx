@@ -38,38 +38,54 @@ export function Highscore() {
         setMusic('ui');
         setGameReady(false);
         setDisableControls(true);
+    }, []); // Add level to the dependency array
 
+    useEffect(() => {
+        // Define the function to run when Enter key is pressed
+        const handleEnterPress = (event: KeyboardEvent) => {
+            if (event.key === 'Enter') {
+                handleNextLevel();
+            }
+        };
+        // Attach the event listener to the document body
+        document.body.addEventListener('keydown', handleEnterPress);
+        // Remove the event listener when the component unmounts
+        return () => {
+            document.body.removeEventListener('keydown', handleEnterPress);
+        };
+    }, []);
+
+    useEffect(() => {
         setTimeout(() => {
-            const encodedAlias = encodeURIComponent(alias);
-            // const encodedTime = highestScores[level]
-            //     ? encodeURIComponent(formatElapsedTime(highestScores[level].elapsedTime))
-            //     : '';
-            // const encodedSteps = highestScores[level]
-            //     ? encodeURIComponent(highestScores[level].score)
-            //     : '';
-            const encodedTime = encodeURIComponent(
-                formatElapsedTime(highestScores[level].elapsedTime)
-            );
-            const encodedSteps = encodeURIComponent(highestScores[level].score);
-
-            const url = `https://diam.se/sokoban/src/php/savehighscore.php?level=${
-                level + 1
-            }&alias=${encodedAlias}&time=${encodedTime}&steps=${encodedSteps}`;
-
             const xhr = new XMLHttpRequest();
+            const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
+
             xhr.open('POST', url);
-            xhr.setRequestHeader('Content-Type', 'application/json'); // Set content type to JSON
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        const data = JSON.parse(xhr.responseText);
-                        console.log('High score saved successfully:', data);
+                        const response = JSON.parse(xhr.responseText);
+                        console.log('Response:', response);
                     } else {
-                        console.error('Error saving high score:', xhr.status);
+                        console.error('Error:', xhr.status);
                     }
                 }
             };
-            xhr.send();
+
+            // Prepare the data to send
+            const data = {
+                level: level + 1,
+                alias: alias,
+                time: formatElapsedTime(highestScores[level]?.elapsedTime || 0),
+                steps: highestScores[level]?.score || 0,
+            };
+
+            // Convert data to JSON string before sending
+            const jsonData = JSON.stringify(data);
+
+            xhr.send(jsonData);
 
             setTimeout(() => {
                 try {
@@ -99,21 +115,6 @@ export function Highscore() {
                 }
             }, 250);
         }, 250);
-    }, []); // Add level to the dependency array
-
-    useEffect(() => {
-        // Define the function to run when Enter key is pressed
-        const handleEnterPress = (event: KeyboardEvent) => {
-            if (event.key === 'Enter') {
-                handleNextLevel();
-            }
-        };
-        // Attach the event listener to the document body
-        document.body.addEventListener('keydown', handleEnterPress);
-        // Remove the event listener when the component unmounts
-        return () => {
-            document.body.removeEventListener('keydown', handleEnterPress);
-        };
     }, []);
 
     function handleMouseOver() {

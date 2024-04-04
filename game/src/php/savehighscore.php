@@ -1,6 +1,5 @@
-<?php 
+<?php
 require("db.php");
-
 
 $response = array();
 
@@ -9,7 +8,33 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, X-Fetch-Request"); // Allow X-Fetch-Request header
 
+// Get the JSON data from the request body
 $requestBody = file_get_contents('php://input');
+
+
+// Function to compare times in the format '0:423'
+function compareTimes($newTime, $existingTime) {
+    $newTimeParts = explode(':', $newTime);
+    $existingTimeParts = explode(':', $existingTime);
+
+    // Extract seconds and milliseconds
+    $newSeconds = (int)$newTimeParts[0];
+    $newMilliseconds = isset($newTimeParts[1]) ? (int)$newTimeParts[1] : 0;
+
+    $existingSeconds = (int)$existingTimeParts[0];
+    $existingMilliseconds = isset($existingTimeParts[1]) ? (int)$existingTimeParts[1] : 0;
+
+// Compare seconds
+if ($newSeconds < $existingSeconds) {
+    return true;
+} elseif ($newSeconds > $existingSeconds) {
+    return false;
+}
+
+// If seconds are equal, compare milliseconds
+return $newMilliseconds < $existingMilliseconds;
+}
+
 if(empty($requestBody)) {
     // If the request body is empty, send a forbidden response
     $response['success'] = false;
@@ -18,14 +43,15 @@ if(empty($requestBody)) {
     exit;
 }
 
-$data = json_decode($requestBody, true);
+    // Decode the JSON data
+    $data = json_decode($requestBody, true);
 
-// Extract data from the JSON object
-if(isset($data['level']) && isset($data['alias']) && isset($data['steps']) && isset($data['time'])) {
-    $level = $data['level'];
-    $alias = urldecode($data['alias']);
-    $steps = $data['steps'];
-    $time = urldecode($data['time']);
+    // Extract data from the JSON
+    $level = (int)$data['level'];
+    $alias = $data['alias'];
+    $time = $data['time'];
+    $steps = (int)$data['steps'];
+
 
     try {
     // Check if a record exists for the provided alias on the specified level
@@ -75,35 +101,12 @@ if(isset($data['level']) && isset($data['alias']) && isset($data['steps']) && is
     }
 
 
-    // Function to compare times in the format '0:423'
-     function compareTimes($newTime, $existingTime) {
-        $newTimeParts = explode(':', $newTime);
-        $existingTimeParts = explode(':', $existingTime);
-
-        // Extract seconds and milliseconds
-        $newSeconds = (int)$newTimeParts[0];
-        $newMilliseconds = isset($newTimeParts[1]) ? (int)$newTimeParts[1] : 0;
-
-        $existingSeconds = (int)$existingTimeParts[0];
-        $existingMilliseconds = isset($existingTimeParts[1]) ? (int)$existingTimeParts[1] : 0;
-
-        // Compare seconds
-        if ($newSeconds < $existingSeconds) {
-            return true;
-        } elseif ($newSeconds > $existingSeconds) {
-            return false;
-        }
-
-        // If seconds are equal, compare milliseconds
-        return $newMilliseconds < $existingMilliseconds;
-    }
+    
 
 
 
     $stmt = $pdo->prepare("DELETE FROM highscore WHERE time = '' OR steps = 0");
     $stmt->execute();
-
-
 
 
 } catch (PDOException $e) {
@@ -112,14 +115,8 @@ if(isset($data['level']) && isset($data['alias']) && isset($data['steps']) && is
 }
 
 
-    } else {
-
-    $response['success'] = false;
-    $response['message'] = "Error: Not enough data specified";
-}
-
-
-
-// Encode the response array as JSON and output it
+// Return a response
+$response['success'] = true;
+$response['message'] = "Data received successfully";
 echo json_encode($response);
 ?>
