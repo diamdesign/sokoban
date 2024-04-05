@@ -122,6 +122,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
 
     const handleStartClick = () => {
         onPageChange('start');
+        setMusic('ui');
         playSound('click', 0.25);
     };
 

@@ -41,6 +41,7 @@ export const Music: React.FC<MusicProps> = ({ audio }) => {
             }
 
             musicPlayer.loop = true;
+
             musicPlayer.play();
         }
 
@@ -51,6 +52,18 @@ export const Music: React.FC<MusicProps> = ({ audio }) => {
             }
         };
     }, [music]);
+
+    function handleClick() {
+        // Play music when music state changes
+        const musicPlayer = audioRef.current;
+        if (musicPlayer.paused) {
+            musicPlayer.play();
+        }
+    }
+
+    document.addEventListener('click', () => {
+        handleClick();
+    });
 
     return <audio id="music" autoPlay loop ref={audioRef} />;
 };
