@@ -1,12 +1,12 @@
 import { useContext, useEffect } from 'react';
 
 import { MyContext } from '../ContextProvider/ContextProvider';
-import { SelectPageProps } from './../components/InterfacePages';
-import allMaps from './../maps/maps';
+/* import allMaps from './../maps/maps';*/
 import { playSound } from './../components/playSound';
 
-export function Settings({ onPageChange }: SelectPageProps) {
+export function Settings() {
     const {
+        mapFiles,
         gameReady,
         testingMap,
         setShowGameContainer,
@@ -28,6 +28,8 @@ export function Settings({ onPageChange }: SelectPageProps) {
         level,
         setCollectedTokens,
         setAlias,
+        onPageChange,
+        setDisableControls,
     } = useContext(MyContext);
 
     useEffect(() => {
@@ -53,8 +55,6 @@ export function Settings({ onPageChange }: SelectPageProps) {
     //         localStorage.setItem('totalTokens', '3');
     //     }
     // }, [totalToken, setTotalToken]);
-
-
 
     function handleMouseOver() {
         playSound('hover', 0.15);
@@ -102,20 +102,28 @@ export function Settings({ onPageChange }: SelectPageProps) {
             localStorage.setItem('totaltokens', newTokenAmount.toString());
             toggleSettings(false);
             resetGame();
-            for (let index = 0; index < allMaps[level].solution.length; index++) {
-                const mapData = allMaps[level].solution[index].mapdata;
-                const direction = allMaps[level].solution[index].direction;
-                console.log(mapData);
-                console.log(direction);
-                direction;
+            const index = mapFiles.findIndex((map) => map.id === level + 1);
+            if (index === -1) {
+                // Handle case where map with given id is not found
+                return;
+            }
+            console.log('Watch solution for level: ', index + 1);
+            setDisableControls(true);
+            for (let i = 0; i < mapFiles[index].mapdata.solution.length; i++) {
+                const mapData = mapFiles[index].mapdata.solution[i].mapdata;
+                const direction = mapFiles[index].mapdata.solution[i].direction;
+
                 setTimeout(() => {
                     setMapData(mapData);
                     setPlayerDirection(direction);
-                }, index * 250);
+                }, i * 250);
+
                 setTimeout(() => {
+                    setDisableControls(false);
                     resetGame();
-                }, (allMaps[level].solution.length + 2) * 250);
+                }, (mapFiles[index].mapdata.solution.length + 2) * 250);
             }
+
             setMusic('play');
             playSound('collect');
         }
@@ -145,7 +153,6 @@ export function Settings({ onPageChange }: SelectPageProps) {
             const resetCollectedTokens = {};
             setCollectedTokens(resetCollectedTokens);
             localStorage.setItem('collectedTokens', JSON.stringify(resetCollectedTokens));
-
         } else {
             // User clicked "Cancel"
             toggleSettings(false);
