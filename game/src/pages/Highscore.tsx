@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { MyContext } from './../ContextProvider/ContextProvider';
 import { formatElapsedTime } from '../utils/TimeUtils';
@@ -23,94 +23,98 @@ export function Highscore() {
         setGameReady,
         setDisableControls,
     } = useContext(MyContext);
+
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
-    const isSavingRef = useRef(false); // Ref to track if saving is in progress
-    const saveHighScoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        const saveHighScore = () => {
-            if (!isSavingRef.current) {
-                // Check if saving is not already in progress
-                setIsSaving(true);
-                isSavingRef.current = true; // Set the flag to indicate saving is in progress
-                const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', url);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        if (xhr.status === 200) {
-                            console.log('High score saved successfully');
-                        } else {
-                            console.error('Error saving high score:', xhr.status);
-                        }
-                        setIsSaving(false);
-                        isSavingRef.current = false; // Reset the flag after saving is completed
-                    }
-                };
-                const data = {
-                    level: level + 1,
-                    alias: alias,
-                    time: formatElapsedTime(highestScores[level]?.elapsedTime || 0),
-                    steps: highestScores[level]?.score || 0,
-                };
-                const jsonData = JSON.stringify(data);
-                xhr.send(jsonData);
-            }
-        };
-
-        // Clear previous timeout when level, alias, or highestScores change
-        if (saveHighScoreTimeoutRef.current !== null) {
-            clearTimeout(saveHighScoreTimeoutRef.current);
+        const storedScores = localStorage.getItem('highestScores');
+        if (storedScores) {
+            setHighestScores(JSON.parse(storedScores));
         }
+        // console.log("Stored Scores: ", storedScores || "No stored scores");
 
-        // Set new timeout to save high score
-        saveHighScoreTimeoutRef.current = setTimeout(() => {
-            saveHighScore();
-        }, 250);
+        playSound('leveldone', 0.3);
+        setShowGameContainer(false);
+        setMusic('ui');
+        setGameReady(false);
+        setDisableControls(true);
 
-        // Clear the timeout when component unmounts
-        return () => {
-            if (saveHighScoreTimeoutRef.current !== null) {
-                clearTimeout(saveHighScoreTimeoutRef.current);
-            }
-        };
-    }, [level, alias, highestScores]);
+        setTimeout(() => {
+            const encodedAlias = encodeURIComponent(alias);
+            // const encodedTime = highestScores[level]
+            //     ? encodeURIComponent(formatElapsedTime(highestScores[level].elapsedTime))
+            //     : '';
+            // const encodedSteps = highestScores[level]
+            //     ? encodeURIComponent(highestScores[level].score)
+            //     : '';
+            const encodedTime = encodeURIComponent(
+                formatElapsedTime(highestScores[level].elapsedTime)
+            );
+            const encodedSteps = encodeURIComponent(highestScores[level].score);
 
-    useEffect(() => {
-        // Fetch high score when component mounts
-        const getHighScore = () => {
-            const getHighScoreUrl = `https://diam.se/sokoban/src/php/gethighscore.php?level=${
+            const url = `https://diam.se/sokoban/src/php/savehighscore.php?level=${
                 level + 1
-            }`;
+            }&alias=${encodedAlias}&time=${encodedTime}&steps=${encodedSteps}`;
+
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', getHighScoreUrl);
+            xhr.open('POST', url);
+            xhr.setRequestHeader('Content-Type', 'application/json'); // Set content type to JSON
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        try {
-                            const result = JSON.parse(xhr.responseText);
-                            setHighscoreDB(result.highscores || []);
-                        } catch (error) {
-                            console.error('Error parsing high score response:', error);
-                        }
+                        const data = JSON.parse(xhr.responseText);
+                        console.log('High score saved successfully:', data);
                     } else {
-                        console.error('Error fetching high score:', xhr.status);
+                        console.error('Error saving high score:', xhr.status);
                     }
                 }
             };
             xhr.send();
+
+            setTimeout(() => {
+                try {
+                    const getHighScoreUrl = `https://diam.se/sokoban/src/php/gethighscore.php?level=${
+                        level + 1
+                    }`;
+                    const xhr2 = new XMLHttpRequest();
+                    xhr2.open('POST', getHighScoreUrl);
+                    xhr2.onreadystatechange = function () {
+                        if (xhr2.readyState === XMLHttpRequest.DONE) {
+                            if (xhr2.status === 200) {
+                                try {
+                                    const result = JSON.parse(xhr2.responseText);
+                                    console.log(result.highscores);
+                                    setHighscoreDB(result.highscores || []);
+                                } catch (error) {
+                                    console.error('Error parsing high score response:', error);
+                                }
+                            } else {
+                                console.error('Error fetching high score:', xhr2.status);
+                            }
+                        }
+                    };
+                    xhr2.send();
+                } catch (error) {
+                    console.error('Error parsing save high score response:', error);
+                }
+            }, 250);
+        }, 250);
+    }, []); // Add level to the dependency array
+
+    useEffect(() => {
+        // Define the function to run when Enter key is pressed
+        const handleEnterPress = (event: KeyboardEvent) => {
+            if (event.key === 'Enter') {
+                handleNextLevel();
+            }
         };
-
-        getHighScore();
-
-        // Fetch high score again every 250 milliseconds
-        const interval = setInterval(getHighScore, 250);
-
-        // Clear the interval when component unmounts
-        return () => clearInterval(interval);
-    }, [level, setHighscoreDB]);
+        // Attach the event listener to the document body
+        document.body.addEventListener('keydown', handleEnterPress);
+        // Remove the event listener when the component unmounts
+        return () => {
+            document.body.removeEventListener('keydown', handleEnterPress);
+        };
+    }, []);
 
     function handleMouseOver() {
         playSound('hover', 0.15);
@@ -150,12 +154,11 @@ export function Highscore() {
         setMapData(initialMapData);
         setPlayerPosition(initialPlayerPosition);
         setBoxPositions(initialBoxPositions);
+        resetGame();
         setShowGameContainer(true);
         setShowGameContainer(true);
         setDisableControls(false);
         setGameReady(true);
-        resetGame();
-        resetGame();
     }
 
     return (

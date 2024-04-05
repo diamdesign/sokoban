@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { MyContext } from '../ContextProvider/ContextProvider';
 import { SelectPageProps } from './../components/InterfacePages';
-
+import allMaps from '../maps/maps';
 import { formatElapsedTime } from '../utils/TimeUtils';
 import { playSound } from './../components/playSound';
 import { useContext } from 'react';
@@ -22,46 +22,13 @@ interface PlayedMap {
 export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
     const [mapFiles, setMapFiles] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
-    const {
-        resetGame,
-        setLevel,
-        setMusic,
-        setGameReady,
-        setDisableControls,
-        playedMaps,
-        setPlayedMaps,
-    } = useContext(MyContext);
+    const { resetGame, setLevel, setMusic, setGameReady, setDisableControls, playedMaps, setPlayedMaps } = useContext(MyContext);
 
     // var { playedMaps, setPlayedMaps } = useContext(MyContext);
 
     useEffect(() => {
         setMusic('ui');
     }, []);
-
-    useEffect(() => {
-        const fetchData = () => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://diam.se/sokoban/src/php/getmap.php');
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        try {
-                            const data = JSON.parse(xhr.responseText);
-
-                            setMapFiles(data.maps); // Assuming the response contains a "maps" property with the array of maps
-                        } catch (error) {
-                            console.error('Error parsing JSON:', error);
-                        }
-                    } else {
-                        console.error('Error fetching data:', xhr.status);
-                    }
-                }
-            };
-            xhr.send();
-        };
-
-        fetchData();
-    }, [mapCount]);
 
     const perPage = 20;
     const startIndex = currentPage * perPage;
@@ -97,7 +64,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
             setPlayedMaps([]);
         }
     }, [setPlayedMaps]);
-    /*
+
     useEffect(() => {
         const mapFilesData: string[] = [];
         for (let i = 1; i <= allMaps.length; i++) {
@@ -107,7 +74,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
 
         setMapFiles(mapFilesData);
     }, [mapCount]);
-*/
+
     const handlePrevClick = () => {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
         playSound('swoosh', 0.15);
@@ -122,7 +89,6 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
 
     const handleStartClick = () => {
         onPageChange('start');
-        setMusic('ui');
         playSound('click', 0.25);
     };
 
@@ -169,6 +135,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
         }
     }
 
+
     return (
         <>
             <div id="selectlevel">
@@ -176,17 +143,15 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
                 <div className="levels" onWheel={handleWheel}>
                     <div className="levels">
                         <ul>
-                            {mapFiles.slice(startIndex, endIndex).map((mapObj, index) => {
-                                const mapId = mapObj.id;
-
+                            {mapFiles.slice(startIndex, endIndex).map((map, index) => {
                                 // Find the corresponding highscore data for the current map
                                 const highscoreData = playedMaps.find(
-                                    (entry) => entry.mapId === mapId
+                                    (entry) => entry.mapId === Number(map)
                                 );
 
                                 const classNames = [''];
 
-                                if (playedMaps.length < mapId) {
+                                if (playedMaps.length < (map ? parseInt(map) : 0)) {
                                     classNames.push('notplayable');
                                 }
 
@@ -196,12 +161,16 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
                                 return (
                                     <li
                                         key={startIndex + index}
-                                        data-mapid={mapId - 1}
+                                        data-mapid={map}
                                         onMouseOver={
-                                            playedMaps.length >= mapId ? handleMouseOver : undefined
+                                            playedMaps.length >= Number(map)
+                                                ? handleMouseOver
+                                                : undefined
                                         }
                                         onClick={
-                                            playedMaps.length >= mapId ? handleMapClick : undefined
+                                            playedMaps.length >= Number(map)
+                                                ? handleMapClick
+                                                : undefined
                                         }
                                         className={classNames.join(' ')}
                                     >
@@ -213,14 +182,14 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
                                                         {highscoreData.score}
                                                     </span>
                                                     <span className="hightime">
-                                                        {formatElapsedTime(
-                                                            highscoreData.elapsedTime
-                                                        )}
+                                                        {formatElapsedTime(highscoreData.elapsedTime)}
                                                     </span>
                                                 </>
                                             )}
                                         </div>
                                     </li>
+
+
                                 );
                             })}
                         </ul>

@@ -8,13 +8,12 @@ import { playSound } from './../components/playSound';
 
 export function StartPageUI({ onPageChange }: SelectPageProps) {
     const { setGameReady, setMusic, alias, setAlias } = useContext(MyContext);
-    const [playerName, setPlayerName] = useState<string>('');
+    const [playerName, setPlayerName] = useState<string >("");
 
     const handleButtonClick = () => {
         onPageChange('selectlevel');
         playSound('click', 0.25);
         playSound('swoosh', 0.25);
-        setMusic('ui');
     };
 
     function handleMouseOver() {
@@ -35,7 +34,7 @@ export function StartPageUI({ onPageChange }: SelectPageProps) {
     };
     const handleSetLocalStorage = () => {
         playSound('click', 0.25);
-        if (playerName === '') {
+        if (playerName === '' ) {
             alert('You need to set an alias');
             return;
         }
@@ -47,10 +46,6 @@ export function StartPageUI({ onPageChange }: SelectPageProps) {
             handleSetLocalStorage();
         }
     };
-
-    useEffect(() => {
-        setMusic('ui');
-    }, []);
 
     useEffect(() => {
         const localAlias = localStorage.getItem('playerAlias');
