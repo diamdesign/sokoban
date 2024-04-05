@@ -12,8 +12,7 @@ dist
 dist-ssr
 *.local
 
-php/dbconfig.php
-sokoban.txt
+
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +24,6 @@ sokoban.txt
 *.njsproj
 *.sln
 *.sw?
+
+php/dbconfig.php
+sokoban.txt.txt
