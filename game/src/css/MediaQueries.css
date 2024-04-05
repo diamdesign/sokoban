@@ -217,9 +217,6 @@
     .listhdb {
         width: 100% !important;
         font-size: 0.75rem !important;
-        height: 37vh !important;
-        overflow-y: auto;
-        scrollbar-width: none;
     }
     #darkoverlay {
         backdrop-filter: blur(0rem) !important;

@@ -195,8 +195,8 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
                             <div className="result">
                                 <div className="row">
                                     <div>{alias}</div>
-                                    <div>{highestScores[level].score}</div>
-                                    <div>{formatElapsedTime(highestScores[level].elapsedTime)}</div>
+                                    <div>{counter}</div>
+                                    <div>{formatElapsedTime(elapsedTime)}</div>
                                 </div>
                             </div>
                         </div>
