@@ -118,6 +118,12 @@ export function SelectLevel({ mapCount }: SelectLevelProps) {
         playSound('swoosh', 0.15);
     };
 
+    const handleApiClick = () => {
+        onPageChange('api');
+        playSound('click', 0.25);
+        playSound('swoosh', 0.15);
+    };
+
     function handleMouseOver() {
         playSound('hover', 0.15);
     }
@@ -231,6 +237,12 @@ export function SelectLevel({ mapCount }: SelectLevelProps) {
                         id="btn-start"
                         className="button"
                         onClick={handleStartClick}
+                        onMouseOver={handleMouseOver}
+                    ></div>
+                    <div
+                        id="btn-api"
+                        className="button"
+                        onClick={handleApiClick}
                         onMouseOver={handleMouseOver}
                     ></div>
                     <div

@@ -658,6 +658,9 @@
     font-size: 2rem;
 }
 
+#credits h4 strong {
+    user-select: all;
+}
 #credits h5,
 #credits a {
     font-size: 1.2rem;
@@ -670,6 +673,29 @@
     text-decoration: none;
     background: black;
     color: white;
+}
+
+#btn-api {
+    position: absolute !important;
+    bottom: 3rem;
+    right: 11rem;
+    left: auto;
+    position: relative;
+}
+#btn-api:after {
+    background-image: url('../assets/icon-api.svg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 5.5rem;
+    filter: drop-shadow(0 1px 0 white);
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    z-index: 1;
 }
 
 #btn-fullscreen {
@@ -858,6 +884,10 @@
     left: 0;
     right: 0;
     z-index: -100;
+}
+
+#space {
+    display: block;
 }
 
 .stars {

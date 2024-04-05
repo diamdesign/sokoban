@@ -24,7 +24,13 @@
         top: 4.5rem;
     }
 
+    #btn-api {
+        bottom: 1.5rem !important;
+        right: 8rem !important;
+    }
+
     #btn-settings:after,
+    #btn-api:after,
     #btn-fullscreen:after,
     #btn-sound:after,
     #btn-replay:after,
@@ -204,6 +210,17 @@
 }
 
 @media screen and (max-width: 640px) {
+    #space {
+        display: none !important;
+    }
+
+    #darkoverlay {
+        backdrop-filter: blur(0rem) !important;
+    }
+
+    #btn-cookie:after {
+        background-size: 1.5rem !important;
+    }
     .grid-container {
         width: 100%;
     }
@@ -268,6 +285,7 @@
     }
 
     #btn-settings:after,
+    #btn-api:after,
     #btn-fullscreen:after,
     #btn-sound:after,
     #btn-replay:after,
@@ -361,6 +379,11 @@
 
     #settings {
         min-height: auto;
+    }
+
+    #btn-api {
+        bottom: 1.5rem !important;
+        right: 6rem !important;
     }
 
     #highscore {

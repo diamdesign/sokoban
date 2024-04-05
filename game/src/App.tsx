@@ -4,6 +4,7 @@ import './css/MediaQueries.css';
 import { useContext, useEffect, useState } from 'react';
 
 import { Credits } from './pages/Credits';
+import { Api } from './pages/Api';
 import { FullscreenToggle } from './components/fullscrenToggle';
 import { MapGenerator } from './components/MapGenerator';
 import { Music } from './components/Music';
@@ -97,6 +98,8 @@ function App() {
                         )}
                         {/* Credits */}
                         {currentPage === 'credits' && <Credits />}
+                        {/* Api */}
+                        {currentPage === 'api' && <Api />}
                         {/* Play */}
                         {currentPage === 'play' && <Play />}
                         <div id="space">
