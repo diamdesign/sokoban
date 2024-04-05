@@ -29,20 +29,34 @@ export function Api() {
                     <br />
                     <h2>Levels</h2>
                     <h4>
-                        <strong>https://diam.se/sokoban/src/php/getmap.php?page=1</strong>
+                        <a href="https://diam.se/sokoban/src/php/getmap.php?page=1" target="_blank">
+                            <strong>https://diam.se/sokoban/src/php/getmap.php?page=1</strong>
+                        </a>
                     </h4>
 
                     <p>To get pagnation of 20 levels per page, with a total count of all maps.</p>
                     <br />
                     <h4>
-                        <strong>https://diam.se/sokoban/src/php/getmap.php?level=1</strong>
+                        <a
+                            href="https://diam.se/sokoban/src/php/getmap.php?level=1"
+                            target="_blank"
+                        >
+                            <strong>https://diam.se/sokoban/src/php/getmap.php?level=1</strong>
+                        </a>
                     </h4>
 
                     <p>To get only get a specific level.</p>
 
                     <h2>Highscores</h2>
                     <h4>
-                        <strong>https://diam.se/sokoban/src/php/gethighscore.php?level=1</strong>
+                        <a
+                            href="https://diam.se/sokoban/src/php/gethighscore.php?level=1"
+                            target="_blank"
+                        >
+                            <strong>
+                                https://diam.se/sokoban/src/php/gethighscore.php?level=1
+                            </strong>
+                        </a>
                     </h4>
 
                     <p>To get the 10 highest scores of each level.</p>

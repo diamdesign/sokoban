@@ -650,6 +650,8 @@
     max-width: 420px;
     font-size: 0.85rem;
     font-weight: 500;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #credits h2 {
