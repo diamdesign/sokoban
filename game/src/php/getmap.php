@@ -38,7 +38,13 @@ try {
         $offset = ($page - 1) * $perPage;
 
         // Prepare SQL query to select maps with pagination
-        $stmt = $pdo->prepare("SELECT * FROM maps ORDER BY id ASC LIMIT :offset, :perPage");
+        $stmt = $pdo->prepare("
+            SELECT *,
+                (SELECT COUNT(*) FROM maps) AS mapcount
+            FROM maps 
+            ORDER BY id ASC 
+            LIMIT :offset, :perPage
+        ");
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindParam(':perPage', $perPage, PDO::PARAM_INT);
         $stmt->execute();
@@ -60,7 +66,10 @@ try {
             $map['mapdata'] = $decodedMapdata;
         }
 
-        $response = $maps;
+        $response = array(
+            'mapcount' => $maps[0]['mapcount'], // Since 'mapcount' is the same for all maps, you can take it from any map
+            'maps' => $maps
+        );
     }
 } catch (PDOException $e) {
     $response['success'] = false;

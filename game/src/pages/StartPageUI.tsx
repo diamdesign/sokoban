@@ -2,13 +2,13 @@ import './../css/Map.css';
 import './../css/StartPageUI.css';
 
 import { useContext, useState, useEffect } from 'react';
-import { SelectPageProps } from './../components/InterfacePages';
 import { MyContext } from '../ContextProvider/ContextProvider';
 import { playSound } from './../components/playSound';
 
-export function StartPageUI({ onPageChange }: SelectPageProps) {
-    const { setGameReady, setMusic, alias, setAlias } = useContext(MyContext);
-    const [playerName, setPlayerName] = useState<string >("");
+export function StartPageUI() {
+    const { setGameReady, setMusic, alias, setAlias, currentPage, onPageChange } =
+        useContext(MyContext);
+    const [playerName, setPlayerName] = useState<string>('');
 
     const handleButtonClick = () => {
         onPageChange('selectlevel');
@@ -34,7 +34,7 @@ export function StartPageUI({ onPageChange }: SelectPageProps) {
     };
     const handleSetLocalStorage = () => {
         playSound('click', 0.25);
-        if (playerName === '' ) {
+        if (playerName === '') {
             alert('You need to set an alias');
             return;
         }

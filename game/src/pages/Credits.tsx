@@ -1,7 +1,10 @@
-import { SelectPageProps } from './../components/InterfacePages';
 import { playSound } from './../components/playSound';
+import { useContext } from 'react';
+import { MyContext } from '../ContextProvider/ContextProvider';
 
-export function Credits({ onPageChange }: SelectPageProps) {
+export function Credits() {
+    const { setGameReady, setMusic, alias, setAlias, currentPage, onPageChange } =
+        useContext(MyContext);
     const handleBackClick = () => {
         onPageChange('selectlevel');
         playSound('click', 0.25);
@@ -46,12 +49,24 @@ export function Credits({ onPageChange }: SelectPageProps) {
                         </a>
                     </h5>
 
-                    <h5><a href="https://github.com/Cloticc" target="_blank" onMouseOver={handleMouseOver}>
+                    <h5>
+                        <a
+                            href="https://github.com/Cloticc"
+                            target="_blank"
+                            onMouseOver={handleMouseOver}
+                        >
                             Andreas Isidorsson
-                        </a></h5>
-                    <h5><a href="https://www.linkedin.com/in/alireza-kt/" target="_blank" onMouseOver={handleMouseOver}>
+                        </a>
+                    </h5>
+                    <h5>
+                        <a
+                            href="https://www.linkedin.com/in/alireza-kt/"
+                            target="_blank"
+                            onMouseOver={handleMouseOver}
+                        >
                             Alireza Kafshdartoosi
-                        </a></h5>
+                        </a>
+                    </h5>
                     <h5>Abbas Mansoori</h5>
                     <h5>Konstantios (Had to leave early)</h5>
                     <br />

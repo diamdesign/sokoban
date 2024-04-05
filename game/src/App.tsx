@@ -15,14 +15,16 @@ import { StartPageUI } from './pages/StartPageUI';
 import allMaps from './maps/maps';
 import { playSound } from './components/playSound';
 
+/*
 type Page = 'start' | 'selectlevel' | 'play' | 'credits' | 'MapGenerator';
-
+*/
 function App() {
-    const [currentPage, setCurrentPage] = useState<Page>('start');
+    /*
+    const [currentPage, setCurrentPage] = useState<Page>('start');*/
 
+    const { settings, toggleSettings, music, setMusic, currentPage, onPageChange } =
+        useContext(MyContext);
     const [level, setLevel] = useState(0);
-    const { settings, toggleSettings } = useContext(MyContext);
-    const { music, setMusic } = useContext(MyContext);
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
@@ -38,6 +40,7 @@ function App() {
     }, []);
 
     useEffect(() => {
+        console.log(allMaps);
         setMusic('ui');
     }, []);
 
@@ -50,10 +53,6 @@ function App() {
     function handleMouseOver() {
         playSound('hover', 0.15);
     }
-
-    const handlePageChange = (page: Page) => {
-        setCurrentPage(page);
-    };
 
     // Function to handle level change
     const handleLevelChange = () => {
@@ -80,30 +79,26 @@ function App() {
                         onMouseOver={handleMouseOver}
                     ></button>
                     <FullscreenToggle />
-                    {settings && <Settings onPageChange={handlePageChange} />}
+                    {settings && <Settings />}
                     {/* Music Player */}
                     {<Music audio={music} />}
                     <div id="startpageui">
                         {/* StartPage UI */}
-                        {currentPage === 'start' && <StartPageUI onPageChange={handlePageChange} />}
+                        {currentPage === 'start' && <StartPageUI />}
                         {/* MapGenerator */}
-                        {currentPage === 'MapGenerator' && (
-                            <MapGenerator onPageChange={handlePageChange} />
-                        )}{' '}
-                        {/* MyComponent */}
+                        {currentPage === 'MapGenerator' && <MapGenerator />} {/* MyComponent */}
                         {/* Select Level*/}
                         {currentPage === 'selectlevel' && (
                             <SelectLevel
-                                onPageChange={handlePageChange}
                                 mapCount={mapCount}
                                 currentLevel={level}
                                 onLevelChange={handleLevelChange}
                             />
                         )}
                         {/* Credits */}
-                        {currentPage === 'credits' && <Credits onPageChange={handlePageChange} />}
+                        {currentPage === 'credits' && <Credits />}
                         {/* Play */}
-                        {currentPage === 'play' && <Play onPageChange={handlePageChange} />}
+                        {currentPage === 'play' && <Play />}
                         <div id="space">
                             <div className="stars"></div>
                             <div className="stars"></div>

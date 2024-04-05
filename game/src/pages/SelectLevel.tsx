@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import { MyContext } from '../ContextProvider/ContextProvider';
-import { SelectPageProps } from './../components/InterfacePages';
+
 import allMaps from '../maps/maps';
 import { formatElapsedTime } from '../utils/TimeUtils';
 import { playSound } from './../components/playSound';
 import { useContext } from 'react';
+import Pagination from './../components/Pagination';
 
 interface SelectLevelProps extends SelectPageProps {
     mapCount: number;
@@ -19,21 +20,31 @@ interface PlayedMap {
     elapsedTime: number;
 }
 
-export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
+export function SelectLevel({ mapCount }: SelectLevelProps) {
     const [mapFiles, setMapFiles] = useState<string[]>([]);
-    const [currentPage, setCurrentPage] = useState<number>(0);
-    const { resetGame, setLevel, setMusic, setGameReady, setDisableControls, playedMaps, setPlayedMaps } = useContext(MyContext);
+
+    const {
+        resetGame,
+        setLevel,
+        setMusic,
+        setGameReady,
+        setDisableControls,
+        playedMaps,
+        setPlayedMaps,
+        currentPage,
+        onPageChange,
+    } = useContext(MyContext);
 
     // var { playedMaps, setPlayedMaps } = useContext(MyContext);
 
     useEffect(() => {
         setMusic('ui');
     }, []);
-
+    /*
     const perPage = 20;
     const startIndex = currentPage * perPage;
     const endIndex = Math.min((currentPage + 1) * perPage, mapFiles.length);
-
+*/
     useEffect(() => {
         const highestScoresJSON = localStorage.getItem('highestScores');
 
@@ -74,7 +85,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
 
         setMapFiles(mapFilesData);
     }, [mapCount]);
-
+    /*
     const handlePrevClick = () => {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
         playSound('swoosh', 0.15);
@@ -86,7 +97,7 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
         );
         playSound('swoosh', 0.15);
     };
-
+*/
     const handleStartClick = () => {
         onPageChange('start');
         playSound('click', 0.25);
@@ -135,11 +146,17 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
         }
     }
 
-
     return (
         <>
             <div id="selectlevel">
                 <h1>Select Level</h1>
+                <Pagination
+                    initialPage={0}
+                    perPage={20}
+                    mapEndpoint="https://diam.se/sokoban/src/php/getmap.php"
+                />
+
+                {/* 
                 <div className="levels" onWheel={handleWheel}>
                     <div className="levels">
                         <ul>
@@ -208,10 +225,8 @@ export function SelectLevel({ onPageChange, mapCount }: SelectLevelProps) {
                         disabled={currentPage === Math.ceil(mapFiles.length / perPage) - 1}
                     ></button>
                 </div>
+                */}
                 <div id="menubuttons">
-                    <span>{`Page ${currentPage + 1} of ${Math.ceil(
-                        mapFiles.length / perPage
-                    )}`}</span>
                     <div
                         id="btn-start"
                         className="button"

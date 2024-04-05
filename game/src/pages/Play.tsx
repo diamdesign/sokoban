@@ -5,13 +5,14 @@ import { useContext, useEffect } from 'react';
 import { Highscore } from './Highscore';
 import { MapRender } from '../components/MapRender';
 import { MyContext } from '../ContextProvider/ContextProvider';
-import { SelectPageProps } from './../components/InterfacePages';
 import allMaps from './../maps/maps';
 import { formatElapsedTime } from '../utils/TimeUtils';
 import { playSound } from './../components/playSound';
 
-export function Play({ onPageChange }: SelectPageProps) {
+export function Play() {
     const {
+        currentPage,
+        onPageChange,
         counter,
         elapsedTime,
         wonGame,

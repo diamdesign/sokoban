@@ -484,9 +484,9 @@
     right: 3rem;
 }
 
-#selectlevel #menubuttons span {
+#selectlevel .pagination {
     position: absolute;
-    top: -7rem;
+    bottom: 11rem;
     font-weight: 600;
     font-size: 1.2rem;
     left: 50%;

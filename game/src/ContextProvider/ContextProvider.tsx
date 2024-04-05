@@ -33,6 +33,8 @@ interface SolutionState {
     direction: string;
 }
 interface GameContextProps {
+    currentPage: string;
+    onPageChange: (currentPage: string) => void;
     alias: string;
     setAlias: (alias: string) => void;
     testingMap: boolean;
@@ -98,10 +100,12 @@ interface GameContextProps {
     // setHighestScores: (highestScores: {
     //     [level: string]: { score: number; elapsedTime: number };
     // }) => void;
-// stet distpatch and setstateaction
-    setHighestScores: Dispatch<SetStateAction<{
-        [level: string]: { score: number; elapsedTime: number };
-    }>>;
+    // stet distpatch and setstateaction
+    setHighestScores: Dispatch<
+        SetStateAction<{
+            [level: string]: { score: number; elapsedTime: number };
+        }>
+    >;
     handleHistory: boolean;
     setHandleHistory: (handleHistory: boolean) => void;
     playerDirection: string;
@@ -135,6 +139,7 @@ interface ChildrenProps {
 export const MyContext = createContext({} as GameContextProps);
 
 export const GameContextProvider = ({ children }: ChildrenProps) => {
+    const [currentPage, onPageChange] = useState<string>('start');
     const [alias, setAlias] = useState(localStorage.getItem('playerName') || null);
     const [testingMap, setTestingMap] = useState<boolean>(false);
     const [mapGeneratorRendering, setMapGeneratorRendering] = useState<boolean>(false);
@@ -208,6 +213,8 @@ export const GameContextProvider = ({ children }: ChildrenProps) => {
     };
 
     const value: GameContextProps = {
+        currentPage: currentPage,
+        onPageChange: onPageChange,
         alias: alias || '',
         setAlias: setAlias,
         testingMap: testingMap,
@@ -291,7 +298,6 @@ export const GameContextProvider = ({ children }: ChildrenProps) => {
         setSpecialBoxIndicator: setSpecialBoxIndicator,
         specialDoor: specialDoor,
         setSpecialDoor: setSpecialDoor,
-
     };
 
     return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
