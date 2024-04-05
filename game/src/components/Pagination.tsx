@@ -16,8 +16,6 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ initialPage = 0, perPage = 20, mapEndpoint }) => {
-    const [currentPagnation, setCurrentPagnation] = useState(initialPage);
-
     const [mapCount, setMapCount] = useState(0);
     const [endIndex, setEndIndex] = useState(0);
     const [startIndex, setStartIndex] = useState(0);
@@ -32,6 +30,8 @@ const Pagination: React.FC<PaginationProps> = ({ initialPage = 0, perPage = 20, 
         currentPage,
         mapFiles,
         setMapFiles,
+        currentPagnation,
+        setCurrentPagnation,
     } = useContext(MyContext);
 
     useEffect(() => {

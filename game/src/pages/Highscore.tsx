@@ -27,6 +27,9 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
         setHighestScores,
         setGameReady,
         setDisableControls,
+        currentPagination,
+        setCurrentPagination,
+        setMapFiles,
     } = useContext(MyContext);
 
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
@@ -148,19 +151,14 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
         playSound('click', 0.25);
         playSound('levelstart', 0.5);
 
-        // // Get the current highestScores from local storage
-        // const highestScoresJSON = localStorage.getItem("highestScores");
-        // const highestScores = highestScoresJSON ? JSON.parse(highestScoresJSON) : {};
-
-        // // Add the current level to highestScores only if it doesn't exist yet
-        // if (!highestScores[level]) {
-        // 	highestScores[level] = { score: Infinity, elapsedTime: Infinity };
-        // }
-
-        // // Save highestScores back to local storage
-        // localStorage.setItem("highestScores", JSON.stringify(highestScores));
-
         const nextLevel = level + 1;
+
+        // Fetch new maps every 20 levels
+        if (nextLevel % 20 === 0) {
+            // Fetch new maps
+            fetchNewMaps();
+        }
+
         setLevel(nextLevel);
         setMapData(initialMapData);
         setPlayerPosition(initialPlayerPosition);
@@ -170,6 +168,18 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
         setShowGameContainer(true);
         setDisableControls(false);
         setGameReady(true);
+    }
+
+    function fetchNewMaps() {
+        const currentPage = Math.floor(level / 20) + 2;
+        console.log(currentPage);
+        fetch(`https://diam.se/sokoban/src/php/getmap.php?page=${currentPage}`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data.maps);
+                setMapFiles(data.maps);
+            })
+            .catch((error) => console.error('Error fetching maps:', error));
     }
 
     return (

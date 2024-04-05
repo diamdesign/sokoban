@@ -36,6 +36,9 @@ interface GameContextProps {
     mapFiles: string[][];
     setMapFiles: (mapFiles: string[][]) => void;
     currentPage: string;
+    currentPagination: number;
+    setCurrentPagination: (currentPagination: number) => void;
+    currentPage: string;
     onPageChange: (currentPage: string) => void;
     alias: string;
     setAlias: (alias: string) => void;
@@ -192,6 +195,7 @@ export const GameContextProvider = ({ children }: ChildrenProps) => {
     const [specialBox, setSpecialBox] = useState<{ x: number; y: number }[]>([]);
     const [specialBoxIndicator, setSpecialBoxIndicator] = useState<{ x: number; y: number }[]>([]);
     const [specialDoor, setSpecialDoor] = useState<{ x: number; y: number }[]>([]);
+    const [currentPagnation, setCurrentPagnation] = useState(0);
 
     const resetGame = () => {
         setCounter(0);
@@ -216,6 +220,8 @@ export const GameContextProvider = ({ children }: ChildrenProps) => {
     };
 
     const value: GameContextProps = {
+        currentPagnation: currentPagnation,
+        setCurrentPagnation: setCurrentPagnation,
         mapFiles: mapFiles,
         setMapFiles: setMapFiles,
         currentPage: currentPage,
