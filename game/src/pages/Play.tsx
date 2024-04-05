@@ -23,6 +23,7 @@ export function Play() {
         setShowGameContainer,
         resetGame,
         gameRunning,
+        mapFiles,
         setGameReady,
     } = useContext(MyContext);
 
@@ -60,11 +61,21 @@ export function Play() {
 			setFinish(true);
 		}, 3000);
 	});
+    
 */
+
+    const mapindex = mapFiles.findIndex((map) => map.id === level + 1);
+    if (mapindex === -1) {
+        // Handle case where map with given id is not found
+        return;
+    }
 
     return (
         <>
-            <div id="showlevel">Level {level + 1}</div>
+            <div id="showlevel">
+                Level {level + 1}
+                <div id="mapby">By {mapFiles[mapindex].alias}</div>
+            </div>
             <div id="status">
                 <div id="stepstaken">{counter} steps</div>
                 <div id="timer">{formatElapsedTime(elapsedTime)}</div>
@@ -91,7 +102,7 @@ export function Play() {
                 onMouseOver={handleMouseOver}
                 onClick={handleSelectLevelClick}
             ></button>
-            <MapRender initialMapData={allMaps[level].mapdata} />
+            <MapRender initialMapData={mapFiles[mapindex].mapdata.mapdata} />
             {wonGame && <Highscore counter={counter} elapsedTime={elapsedTime} />}
             {youAreDead && <h1 className="dead">You are dead</h1>}
             {youLost && <h1 className="dead">You lost</h1>}

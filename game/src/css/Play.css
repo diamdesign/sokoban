@@ -111,6 +111,12 @@
         drop-shadow(0 0 0px black) drop-shadow(0 0 0px black) drop-shadow(0 0 0px black);
 }
 
+#showlevel #mapby {
+    font-size: 1rem;
+    text-align: center;
+    margin-top: -0.5rem;
+}
+
 #stepstaken {
     position: relative;
     top: auto;
@@ -128,7 +134,7 @@
         drop-shadow(0 0 0px black) drop-shadow(0 0 0px black) drop-shadow(0 0 0px black);
     position: absolute;
     display: flex;
-    top: 7rem;
+    top: 9rem;
     font-size: 2rem;
     z-index: 2500;
 }
