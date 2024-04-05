@@ -9,11 +9,11 @@ header("Access-Control-Allow-Origin: *");
 $response = array(); // Initialize the response array
 
 try {
-    if (isset($_GET['id']) || isset($_POST['id'])) {
-        if (isset($_GET['id'])) {
-            $level = $_GET['id'];
+    if (isset($_GET['level']) || isset($_POST['level'])) {
+        if (isset($_GET['level'])) {
+            $level = $_GET['level'];
         } else {
-            $level = $_POST['id'];
+            $level = $_POST['level'];
         }
 
         // Prepare SQL query to select maps for a specific level
@@ -27,8 +27,7 @@ try {
             $map['mapdata'] = json_decode($map['mapdata'], true);
         }
 
-        $response['success'] = true;
-        $response['maps'] = $maps;
+        $response = $maps;
     } else {
         // Define pagination parameters
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1; // Get current page number from query parameter, default to page 1 if not provided
