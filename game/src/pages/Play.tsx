@@ -91,7 +91,7 @@ export function Play({ onPageChange }: SelectPageProps) {
                 onClick={handleSelectLevelClick}
             ></button>
             <MapRender initialMapData={allMaps[level].mapdata} />
-            {wonGame && <Highscore />}
+            {wonGame && <Highscore counter={counter} elapsedTime={elapsedTime} />}
             {youAreDead && <h1 className="dead">You are dead</h1>}
             {youLost && <h1 className="dead">You lost</h1>}
         </>

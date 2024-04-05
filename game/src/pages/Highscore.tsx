@@ -4,7 +4,12 @@ import { MyContext } from './../ContextProvider/ContextProvider';
 import { formatElapsedTime } from '../utils/TimeUtils';
 import { playSound } from './../components/playSound';
 
-export function Highscore() {
+interface HighScoreProps {
+    counter: number;
+    elapsedTime: number;
+}
+
+export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) => {
     const {
         setShowGameContainer,
         setMapData,
@@ -27,6 +32,10 @@ export function Highscore() {
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
 
     useEffect(() => {
+        console.log(counter, formatElapsedTime(elapsedTime));
+    }, []);
+
+    useEffect(() => {
         const storedScores = localStorage.getItem('highestScores');
         if (storedScores) {
             setHighestScores(JSON.parse(storedScores));
@@ -40,21 +49,21 @@ export function Highscore() {
         setDisableControls(true);
 
         setTimeout(() => {
-            const encodedAlias = encodeURIComponent(alias);
-            // const encodedTime = highestScores[level]
-            //     ? encodeURIComponent(formatElapsedTime(highestScores[level].elapsedTime))
-            //     : '';
-            // const encodedSteps = highestScores[level]
-            //     ? encodeURIComponent(highestScores[level].score)
-            //     : '';
-            const encodedTime = encodeURIComponent(
-                formatElapsedTime(highestScores[level].elapsedTime)
-            );
-            const encodedSteps = encodeURIComponent(highestScores[level].score);
+            const encodedAlias = alias;
+            const encodedTime = formatElapsedTime(elapsedTime);
+            const encodedSteps = counter;
 
-            const url = `https://diam.se/sokoban/src/php/savehighscore.php?level=${
-                level + 1
-            }&alias=${encodedAlias}&time=${encodedTime}&steps=${encodedSteps}`;
+            // Create a JSON object with the data
+            const data = {
+                level: level + 1,
+                alias: encodedAlias,
+                time: encodedTime,
+                steps: encodedSteps,
+            };
+
+            console.log(data);
+
+            const url = 'https://diam.se/sokoban/src/php/savehighscore.php';
 
             const xhr = new XMLHttpRequest();
             xhr.open('POST', url);
@@ -62,14 +71,16 @@ export function Highscore() {
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        const data = JSON.parse(xhr.responseText);
-                        console.log('High score saved successfully:', data);
+                        const responseData = JSON.parse(xhr.responseText);
+                        console.log('High score saved successfully:', responseData);
                     } else {
                         console.error('Error saving high score:', xhr.status);
                     }
                 }
             };
-            xhr.send();
+
+            // Convert data object to JSON string and send it
+            xhr.send(JSON.stringify(data));
 
             setTimeout(() => {
                 try {
@@ -97,8 +108,8 @@ export function Highscore() {
                 } catch (error) {
                     console.error('Error parsing save high score response:', error);
                 }
-            }, 250);
-        }, 250);
+            }, 1000);
+        }, 1);
     }, []); // Add level to the dependency array
 
     useEffect(() => {
@@ -220,4 +231,4 @@ export function Highscore() {
             <div id="darkoverlay"></div>
         </>
     );
-}
+};

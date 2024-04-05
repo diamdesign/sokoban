@@ -12,28 +12,6 @@ header("Access-Control-Allow-Headers: Content-Type, X-Fetch-Request"); // Allow 
 $requestBody = file_get_contents('php://input');
 
 
-// Function to compare times in the format '0:423'
-function compareTimes($newTime, $existingTime) {
-    $newTimeParts = explode(':', $newTime);
-    $existingTimeParts = explode(':', $existingTime);
-
-    // Extract seconds and milliseconds
-    $newSeconds = (int)$newTimeParts[0];
-    $newMilliseconds = isset($newTimeParts[1]) ? (int)$newTimeParts[1] : 0;
-
-    $existingSeconds = (int)$existingTimeParts[0];
-    $existingMilliseconds = isset($existingTimeParts[1]) ? (int)$existingTimeParts[1] : 0;
-
-// Compare seconds
-if ($newSeconds < $existingSeconds) {
-    return true;
-} elseif ($newSeconds > $existingSeconds) {
-    return false;
-}
-
-// If seconds are equal, compare milliseconds
-return $newMilliseconds < $existingMilliseconds;
-}
 
 if(empty($requestBody)) {
     // If the request body is empty, send a forbidden response
@@ -52,6 +30,28 @@ if(empty($requestBody)) {
     $time = $data['time'];
     $steps = (int)$data['steps'];
 
+    
+// Function to compare times in the format '0:423'
+function compareTimes($newTime, $existingTime) {
+    $newTimeParts = explode(':', $newTime);
+    $existingTimeParts = explode(':', $existingTime);
+
+    // Extract seconds and milliseconds
+    $newSeconds = (int)$newTimeParts[0];
+    $newMilliseconds = isset($newTimeParts[1]) ? (int)$newTimeParts[1] : 0;
+
+    $existingSeconds = (int)$existingTimeParts[0];
+    $existingMilliseconds = isset($existingTimeParts[1]) ? (int)$existingTimeParts[1] : 0;
+
+    if ($newSeconds < $existingSeconds) {
+        return true;
+    } elseif ($newSeconds > $existingSeconds) {
+        return false;
+    }
+
+// If seconds are equal, compare milliseconds
+return $newMilliseconds < $existingMilliseconds;
+}
 
     try {
     // Check if a record exists for the provided alias on the specified level
