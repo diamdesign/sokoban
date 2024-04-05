@@ -8,7 +8,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, X-Fetch-Request"); // Allow X-Fetch-Request header
 
-// Get the JSON data from the request body
 $jsonData = file_get_contents('php://input');
 
 // Check if JSON data is present
@@ -19,6 +18,9 @@ if (!isset($jsonData) || empty($jsonData)) {
     exit;
 }
 
+// Decode the JSON data
+$decodedData = json_decode($jsonData, true);
+
 // Check if JSON data is valid
 if ($decodedData === null) {
     $response['success'] = false;
@@ -26,6 +28,7 @@ if ($decodedData === null) {
     echo json_encode($response);
     exit;
 }
+
 /*
 // Specify the directory where JSON files are stored
 $directory = '../../assets/';
@@ -48,13 +51,53 @@ if (empty($files)) {
 $newFileName = 'map' . ($latestFileNumber + 1) . '.js';
 $filePath = $directory . $newFileName;
 */
+
+$alias = $decodedData['alias'];
+$data = json_encode($decodedData['data']);
+
 try {
     // Insert JSON data into the database
-    $insertStmt = $pdo->prepare("INSERT INTO maps (mapdata) VALUES (:mapdata)");
-    $insertStmt->bindParam(':mapdata', $jsonData, PDO::PARAM_STR);
+    // Check if the data already exists
+    $selectStmt = $pdo->prepare("SELECT COUNT(*) FROM maps WHERE mapdata = :mapdata");
+    $selectStmt->bindParam(':mapdata', $data, PDO::PARAM_STR);
+    $selectStmt->execute();
+    $count = $selectStmt->fetchColumn();
+
+    if ($count > 0) {
+        // Data already exists, handle accordingly (e.g., return error response)
+        $response['exist'] = true;
+        $response['message'] = "Data already exists in the database";
+        echo json_encode($response);
+        exit;
+    }
+
+    // Insert the data into the database
+    $insertStmt = $pdo->prepare("INSERT INTO maps (alias, mapdata) VALUES (:alias, :mapdata)");
+    $insertStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
+    $insertStmt->bindParam(':mapdata', $data, PDO::PARAM_STR); 
     $insertStmt->execute();
 
+
+        // Retrieve all existing IDs from the maps table
+    $existingIdsStmt = $pdo->query("SELECT id FROM maps ORDER BY id");
+    $existingIds = $existingIdsStmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // Check if there are any gaps in the IDs
+    $expectedIds = range(1, count($existingIds));
+    if ($existingIds !== $expectedIds) {
+        // Reorder the IDs sequentially starting from 1
+        $newIds = range(1, count($existingIds));
+
+        // Update the IDs in the database
+        $updateStmt = $pdo->prepare("UPDATE maps SET id = :newId WHERE id = :oldId");
+        for ($i = 0; $i < count($existingIds); $i++) {
+            $updateStmt->execute([':newId' => $newIds[$i], ':oldId' => $existingIds[$i]]);
+        }
+    }
+
+
     $response['status'] = 'success';
+
     /*
     // Save the JSON data to the new file
     if (file_put_contents($filePath, $jsonData) !== false) {

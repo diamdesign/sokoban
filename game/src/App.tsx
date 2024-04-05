@@ -12,7 +12,7 @@ import { Play } from './pages/Play';
 import { SelectLevel } from './pages/SelectLevel';
 import { Settings } from './pages/Settings';
 import { StartPageUI } from './pages/StartPageUI';
-import allMaps from './maps/maps';
+/*import allMaps from './maps/maps';*/
 import { playSound } from './components/playSound';
 
 /*
@@ -22,8 +22,16 @@ function App() {
     /*
     const [currentPage, setCurrentPage] = useState<Page>('start');*/
 
-    const { settings, toggleSettings, music, setMusic, currentPage, onPageChange } =
-        useContext(MyContext);
+    const {
+        settings,
+        toggleSettings,
+        music,
+        setMusic,
+        currentPage,
+        onPageChange,
+        mapFiles,
+        mapCount,
+    } = useContext(MyContext);
     const [level, setLevel] = useState(0);
     const [isReady, setIsReady] = useState(false);
 
@@ -40,7 +48,6 @@ function App() {
     }, []);
 
     useEffect(() => {
-        console.log(allMaps);
         setMusic('ui');
     }, []);
 
@@ -56,13 +63,10 @@ function App() {
 
     // Function to handle level change
     const handleLevelChange = () => {
-        const mapKeys = Object.keys(allMaps);
-        const nextIndex = (level % mapKeys.length) + 1;
+        const mapKeys = Object.keys(mapFiles);
+        const nextIndex = (level % mapCount) + 1;
         setLevel(nextIndex);
     };
-
-    // Calculate map count
-    const mapCount = Object.keys(allMaps).length;
 
     return (
         <>
@@ -89,11 +93,7 @@ function App() {
                         {currentPage === 'MapGenerator' && <MapGenerator />} {/* MyComponent */}
                         {/* Select Level*/}
                         {currentPage === 'selectlevel' && (
-                            <SelectLevel
-                                mapCount={mapCount}
-                                currentLevel={level}
-                                onLevelChange={handleLevelChange}
-                            />
+                            <SelectLevel currentLevel={level} onLevelChange={handleLevelChange} />
                         )}
                         {/* Credits */}
                         {currentPage === 'credits' && <Credits />}

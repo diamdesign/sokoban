@@ -196,6 +196,7 @@ function Emptydivs({
 
 export function MapGenerator() {
     const {
+        alias,
         currentPage,
         onPageChange,
         setMapData,
@@ -339,35 +340,34 @@ export function MapGenerator() {
             direction: obj.direction,
         }));
         const mergedData = {
-            mapdata: savedMapData,
-            solution: Solution,
+            alias: alias,
+            data: {
+                mapdata: savedMapData,
+                solution: Solution,
+            },
         };
-
-        /* // OLD STUFF
-        const blob = new Blob([JSON.stringify(mergedData, null, 2)], { type: 'application/json' });
         console.log(mergedData);
-        // Create a temporary link element
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        console.log(blob);
-        const filename = prompt('Name map');
-        if (filename) {
-            link.download = filename + '.json';
 
-            // Trigger a click event on the link to start the download
-            link.click();
-
-            // Cleanup: remove the link and revoke the Blob URL
-            link.remove();
-            window.URL.revokeObjectURL(link.href);
+        // If solution is an empty array, return early
+        if (Solution.length === 0) {
+            alert(
+                'There was an error storing solution, please retry playing the level again to save the solution for the level.'
+            );
+            return;
         }
-        */
+
+        let isSaving = false;
 
         function saveJsonToFile(data: any) {
+            // Check if saving is already in progress
+            if (isSaving) {
+                console.log('Save operation is already in progress.');
+                return;
+            }
+
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'https://diam.se/sokoban/src/php/savemap.php');
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // Custom X-Requested-With header
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -375,8 +375,15 @@ export function MapGenerator() {
                             const result = JSON.parse(xhr.responseText);
                             if (result.success) {
                                 console.log('File saved successfully:', result.file);
+                                alert(
+                                    'Map has been saved into database. You can now play it, if you have managed to solve all other maps before it, it has been placed as the current last level.'
+                                );
+                            } else if (result.exist) {
+                                alert('This exact map already exist.');
+                                return;
                             } else {
-                                throw new Error('Failed to save file');
+                                console.error('Failed to save file:', result.message);
+                                return;
                             }
                         } catch (error: any) {
                             console.error('Error parsing response:', error.message);
@@ -390,6 +397,13 @@ export function MapGenerator() {
         }
 
         saveJsonToFile(mergedData);
+
+        setTestingMap(false);
+        setMusic('create');
+        playSound('swoosh', 0.25);
+        setShowMapRender(false);
+        setMapGeneratorRendering(false);
+        setGameReady(false);
     }
 
     const handleGridClick = (
