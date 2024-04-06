@@ -209,7 +209,7 @@
     }
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 768px) {
     #space {
         display: none !important;
     }
@@ -221,12 +221,44 @@
     #darkoverlay {
         backdrop-filter: blur(0rem) !important;
     }
+    #selectlevel {
+        scale: 0.85 !important;
+    }
+
+    #player {
+        width: 40% !important;
+    }
+    #startplay {
+        margin-top: 0rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        padding: 3rem !important;
+    }
+
+    #selectlevel .levels ul li {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        padding: 0 !important;
+        height: 3.5rem !important;
+    }
 
     #btn-cookie:after {
         background-size: 1.5rem !important;
     }
     .grid-container {
-        width: 100%;
+        width: 100% !important;
+        max-height: calc(100vh - 6rem) !important;
+        max-width: calc(100vh - 6rem) !important;
+        margin-top: 0 !important;
+    }
+    #setalias input {
+        padding: 1.2rem !important;
+        font-size: 1.2rem !important;
+    }
+
+    .grid-container-editor {
+        margin-left: 2rem !important;
     }
 
     #showlevel {

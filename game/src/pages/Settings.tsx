@@ -199,6 +199,12 @@ export function Settings() {
                         onMouseOver={handleMouseOver}
                     ></button>
                 </div>
+                <br />
+                <br />
+                <p>
+                    Use <strong>"R"</strong> Key to reset map. <strong>"SPACE"</strong> Key to undo
+                    step.
+                </p>
             </div>
             <div id="darkoverlay"></div>
         </>
