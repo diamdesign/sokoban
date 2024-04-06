@@ -67,7 +67,15 @@ export function Credits() {
                             Alireza Kafshdartoosi
                         </a>
                     </h5>
-                    <h5>Abbas Mansoori</h5>
+                    <h5>
+                        <a
+                            href="https://github.com/mansooriabbas"
+                            target="_blank"
+                            onMouseOver={handleMouseOver}
+                        >
+                            Abbas Mansoori
+                        </a>
+                    </h5>
                     <h5>Konstantios (Had to leave early)</h5>
                     <br />
                 </div>
