@@ -347,20 +347,17 @@ export function MoveChar({
 
     //Just to trigger the door when the box is on the special indicator changes to ground
     const triggerDoor = (doorPosition: { x: number; y: number }, newMapData: string[][]) => {
-        // Function to generate a random boolean value
         const getRandomBoolean = () => Math.random() < 0.5;
 
-        // Randomly choose whether to play 'walldoor' or use setTimeout
         const shouldPlayWallDoor = getRandomBoolean();
 
         if (shouldPlayWallDoor) {
             playSound('walldoor', 0.7);
         } else {
-            // Execute setTimeout with a random delay
             setTimeout(() => {
                 playSound('wallexplode', 0.3);
                 setDivClass(doorPosition.x, doorPosition.y, 'explode');
-            }, 1); // Random delay up to 1000 milliseconds
+            }, 1);
         }
 
         // Update newMapData
