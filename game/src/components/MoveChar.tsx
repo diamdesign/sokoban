@@ -160,7 +160,7 @@ export function MoveChar({
         a.remove();
         window.URL.revokeObjectURL(a.href);
     };
-    
+
     const handleHistoryUndo = useCallback(() => {
         if (history.length > 1) {
             const prevState = history[history.length - 1];
@@ -223,6 +223,28 @@ export function MoveChar({
         setGameRunning?.(false);
         setWonGame(true);
     }, []);
+
+    function setDivClass(positionX: number, positionY: number, classname: string) {
+        const gridContainer = document.querySelector('.grid-container');
+
+        if (gridContainer) {
+            const gridItems = gridContainer.querySelectorAll('[class^="grid-item"]');
+
+            const x = positionY;
+            const y = positionX;
+
+            gridItems.forEach((gridItem, index) => {
+                const gridX = Math.floor(index / 10);
+                const gridY = index % 10;
+
+                if (gridX === x && gridY === y) {
+                    gridItem.classList.add(classname);
+                } else {
+                    gridItem.classList.remove(classname);
+                }
+            });
+        }
+    }
 
     const isWithinBoundaries = (position: { x: number; y: number }) => {
         return (
@@ -325,7 +347,25 @@ export function MoveChar({
 
     //Just to trigger the door when the box is on the special indicator changes to ground
     const triggerDoor = (doorPosition: { x: number; y: number }, newMapData: string[][]) => {
+        // Function to generate a random boolean value
+        const getRandomBoolean = () => Math.random() < 0.5;
+
+        // Randomly choose whether to play 'walldoor' or use setTimeout
+        const shouldPlayWallDoor = getRandomBoolean();
+
+        if (shouldPlayWallDoor) {
+            playSound('walldoor', 0.7);
+        } else {
+            // Execute setTimeout with a random delay
+            setTimeout(() => {
+                playSound('wallexplode', 0.3);
+                setDivClass(doorPosition.x, doorPosition.y, 'explode');
+            }, 1); // Random delay up to 1000 milliseconds
+        }
+
+        // Update newMapData
         newMapData[doorPosition.y][doorPosition.x] = ',';
+
         setMapData(newMapData);
     };
 
@@ -389,27 +429,6 @@ export function MoveChar({
         }
     };
 
-    function setDivClass(positionX: number, positionY: number, classname: string) {
-        const gridContainer = document.querySelector('.grid-container');
-
-        if (gridContainer) {
-            const gridItems = gridContainer.querySelectorAll('[class^="grid-item"]');
-
-            const x = positionY;
-            const y = positionX;
-
-            gridItems.forEach((gridItem, index) => {
-                const gridX = Math.floor(index / 10);
-                const gridY = index % 10;
-
-                if (gridX === x && gridY === y) {
-                    gridItem.classList.add(classname);
-                } else {
-                    gridItem.classList.remove(classname);
-                }
-            });
-        }
-    }
     // console.log(mapData);
     const handlePlayerMove = useCallback(
         (direction: string) => {

@@ -541,12 +541,11 @@ export function MapGenerator() {
                 }
             })
         );
-
+        setMusic('play');
         setTestingMap(true);
         setDisableControls(false);
         playSound('click', 0.25);
         playSound('levelstart', 0.25);
-        setMusic('play');
 
         setMapData(symbolArray);
         setSolution([]);
