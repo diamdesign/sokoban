@@ -27,94 +27,106 @@ if(empty($requestBody)) {
     // Extract data from the JSON
     $level = (int)$data['level'];
     $alias = $data['alias'];
-    $time = $data['time'];
+
     $steps = (int)$data['steps'];
 
+    $time = $data['time'];
+    $days = $data['time']['days'];
+    $hours = $data['time']['hours'];
+    $minutes = $data['time']['minutes'];
+    $seconds = $data['time']['seconds'];
+    $milliseconds = $data['time']['milliseconds'];
     
-// Function to compare times in the format '0:423'
+
+
 function compareTimes($newTime, $existingTime) {
-    $newTimeParts = explode(':', $newTime);
-    $existingTimeParts = explode(':', $existingTime);
+    $newDays = (int)$newTime['days'];
+    $newHours = (int)$newTime['hours'];
+    $newMinutes = (int)$newTime['minutes'];
+    $newSeconds = (int)$newTime['seconds'];
+    $newMilliseconds = (int)$newTime['milliseconds'];
 
-    // Extract seconds and milliseconds
-    $newSeconds = (int)$newTimeParts[0];
-    $newMilliseconds = isset($newTimeParts[1]) ? (int)$newTimeParts[1] : 0;
+    $existingDays = (int)$existingTime['days'];
+    $existingHours = (int)$existingTime['hours'];
+    $existingMinutes = (int)$existingTime['minutes'];
+    $existingSeconds = (int)$existingTime['seconds'];
+    $existingMilliseconds = (int)$existingTime['milliseconds'];
 
-    $existingSeconds = (int)$existingTimeParts[0];
-    $existingMilliseconds = isset($existingTimeParts[1]) ? (int)$existingTimeParts[1] : 0;
+    // Convert all time components to milliseconds for comparison
+    $newTotalMilliseconds = $newDays * 24 * 60 * 60 * 1000 +
+                             $newHours * 60 * 60 * 1000 +
+                             $newMinutes * 60 * 1000 +
+                             $newSeconds * 1000 +
+                             $newMilliseconds;
 
-    if ($newSeconds < $existingSeconds) {
-        return true;
-    } elseif ($newSeconds > $existingSeconds) {
-        return false;
-    }
+    $existingTotalMilliseconds = $existingDays * 24 * 60 * 60 * 1000 +
+                                 $existingHours * 60 * 60 * 1000 +
+                                 $existingMinutes * 60 * 1000 +
+                                 $existingSeconds * 1000 +
+                                 $existingMilliseconds;
 
-// If seconds are equal, compare milliseconds
-return $newMilliseconds < $existingMilliseconds;
+    return $newTotalMilliseconds < $existingTotalMilliseconds;
 }
 
+
     try {
-    // Check if a record exists for the provided alias on the specified level
-    $existingStmt = $pdo->prepare("SELECT steps, time FROM highscore WHERE BINARY alias = :alias AND level = :level");
-    $existingStmt->bindParam(':level', $level, PDO::PARAM_INT);
-    $existingStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
-    $existingStmt->execute();
-    $existingScore = $existingStmt->fetch(PDO::FETCH_ASSOC);
+// Check if a record exists for the provided alias on the specified level
+$existingStmt = $pdo->prepare("SELECT steps, days, hours, minutes, seconds, milliseconds FROM highscore WHERE BINARY alias = :alias AND level = :level");
+$existingStmt->bindParam(':level', $level, PDO::PARAM_INT);
+$existingStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
+$existingStmt->execute();
+$existingScore = $existingStmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$existingScore) {
-        // If no existing record, insert the new score
+if (!$existingScore) {
+    // If no existing record, insert the new score
 
-        // Insert the new high score
-        $insertStmt = $pdo->prepare("INSERT INTO highscore (level, alias, steps, time) VALUES (:level, :alias, :steps, :time)");
-        $insertStmt->bindParam(':level', $level, PDO::PARAM_INT);
-        $insertStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
-        $insertStmt->bindParam(':steps', $steps, PDO::PARAM_INT);
-        $insertStmt->bindParam(':time', $time, PDO::PARAM_STR);
-        $insertStmt->execute();
+    // Insert the new high score
+    $insertStmt = $pdo->prepare("INSERT INTO highscore (level, alias, steps, days, hours, minutes, seconds, milliseconds) VALUES (:level, :alias, :steps, :days, :hours, :minutes, :seconds, :milliseconds)");
+    $insertStmt->bindParam(':level', $level, PDO::PARAM_INT);
+    $insertStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
+    $insertStmt->bindParam(':steps', $steps, PDO::PARAM_INT);
+    $insertStmt->bindParam(':days', $days, PDO::PARAM_INT);
+    $insertStmt->bindParam(':hours', $hours, PDO::PARAM_INT);
+    $insertStmt->bindParam(':minutes', $minutes, PDO::PARAM_INT);
+    $insertStmt->bindParam(':seconds', $seconds, PDO::PARAM_INT);
+    $insertStmt->bindParam(':milliseconds', $milliseconds, PDO::PARAM_INT);
+    $insertStmt->execute();
+
+    $response['success'] = true;
+    $response['message'] = "High score added successfully";
+} else {
+    // If existing record, check if new score is better
+
+    if ($steps < $existingScore['steps'] || ($steps == $existingScore['steps'] && compareTimes($time, $existingScore))) {
+        // If new score is better, update the existing record
+
+        // Update the existing high score
+        $updateStmt = $pdo->prepare("UPDATE highscore SET steps = :steps, days = :days, hours = :hours, minutes = :minutes, seconds = :seconds, milliseconds = :milliseconds WHERE level = :level AND alias = :alias");
+        $updateStmt->bindParam(':level', $level, PDO::PARAM_INT);
+        $updateStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
+        $updateStmt->bindParam(':steps', $steps, PDO::PARAM_INT);
+        $updateStmt->bindParam(':days', $days, PDO::PARAM_INT);
+        $updateStmt->bindParam(':hours', $hours, PDO::PARAM_INT);
+        $updateStmt->bindParam(':minutes', $minutes, PDO::PARAM_INT);
+        $updateStmt->bindParam(':seconds', $seconds, PDO::PARAM_INT);
+        $updateStmt->bindParam(':milliseconds', $milliseconds, PDO::PARAM_INT);
+        $updateStmt->execute();
 
         $response['success'] = true;
-        $response['message'] = "High score added successfully";
+        $response['message'] = "High score updated successfully";
     } else {
-        // If existing record, check if new score is better
+        // If new score is not better, do nothing
 
-        if ($steps < $existingScore['steps'] || ($steps == $existingScore['steps'] && compareTimes($time, $existingScore['time']))) {
-            // If new score is better, update the existing record
-
-            // Update the existing high score
-            $updateStmt = $pdo->prepare("UPDATE highscore SET steps = :steps, time = :time WHERE level = :level AND alias = :alias");
-            $updateStmt->bindParam(':level', $level, PDO::PARAM_INT);
-            $updateStmt->bindParam(':alias', $alias, PDO::PARAM_STR);
-            $updateStmt->bindParam(':steps', $steps, PDO::PARAM_INT);
-            $updateStmt->bindParam(':time', $time, PDO::PARAM_STR);
-            $updateStmt->execute();
-
-            $response['success'] = true;
-            $response['message'] = "High score updated successfully";
-        } else {
-            // If new score is not better, do nothing
-
-            $response['success'] = true;
-            $response['message'] = "No high score added or updated";
-        }
-
- 
+        $response['success'] = true;
+        $response['message'] = "No high score added or updated";
     }
+}
 
-
-    
-
-
-
-    $stmt = $pdo->prepare("DELETE FROM highscore WHERE time = '' OR steps = 0");
-    $stmt->execute();
-
+    // Delete records where all time components are 0 or steps are 0
     $stmt = $pdo->prepare("
-        DELETE h1
-        FROM highscore h1
-        INNER JOIN highscore h2 ON h1.id > h2.id
-            AND h1.alias = h2.alias
-            AND h1.steps = h2.steps
-            AND h1.time = h2.time
+        DELETE FROM highscore 
+        WHERE (days = 0 AND hours = 0 AND minutes = 0 AND seconds = 0 AND milliseconds = 0) 
+        OR steps = 0
     ");
     $stmt->execute();
 

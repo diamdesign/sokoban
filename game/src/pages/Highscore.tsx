@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { MyContext } from './../ContextProvider/ContextProvider';
-import { formatElapsedTime } from '../utils/TimeUtils';
+import { formatElapsedTime, formatMilliseconds } from '../utils/TimeUtils';
 import { playSound } from './../components/playSound';
 
 interface HighScoreProps {
@@ -55,7 +55,7 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
 
         setTimeout(() => {
             const encodedAlias = alias;
-            const encodedTime = formatElapsedTime(elapsedTime);
+            const encodedTime = formatMilliseconds(elapsedTime);
             const encodedSteps = counter;
 
             // Create a JSON object with the data

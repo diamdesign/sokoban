@@ -18,29 +18,66 @@ if(isset($_GET['level']) || isset($_POST['level'])) {
     try {
         // Prepare SQL query to select the 10 best high scores
         $stmt = $pdo->prepare("
-            SELECT h.*
-            FROM highscore h
-            INNER JOIN (
-                SELECT alias, MIN(steps) AS min_steps, MIN(time) AS min_time
-                FROM highscore
-                WHERE level = :sub_level
-                GROUP BY alias
-            ) AS t ON h.alias = t.alias AND h.steps = t.min_steps AND h.time = t.min_time
-            WHERE h.level = :main_level
-            GROUP BY h.alias, h.steps, h.time
-            ORDER BY h.steps ASC, h.time ASC
-            LIMIT 10
-        ");
+    SELECT h.*, 
+           (h.days * 24 * 60 * 60 * 1000) + 
+           (h.hours * 60 * 60 * 1000) + 
+           (h.minutes * 60 * 1000) + 
+           (h.seconds * 1000) + 
+           h.milliseconds AS total_milliseconds
+    FROM highscore h
+    WHERE h.level = :level
+    ORDER BY total_milliseconds ASC
+    LIMIT 50
+");
 
-        // Bind the level parameter
-        $stmt->bindParam(':main_level', $level, PDO::PARAM_INT);
-        $stmt->bindParam(':sub_level', $level, PDO::PARAM_INT);
+$stmt->bindParam(':level', $level, PDO::PARAM_INT);
+$stmt->execute();
 
-        // Execute the query
-        $stmt->execute();
+$highscores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Fetch the results
-        $highscores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Format the time and milliseconds
+foreach ($highscores as &$highscore) {
+    $time = '';
+
+    // Check if both seconds and preceding time components are zero
+    $allZero = ($highscore['days'] == 0 && $highscore['hours'] == 0 && $highscore['minutes'] == 0 && $highscore['seconds'] == 0);
+
+    if ($highscore['days'] > 0) {
+        $time .= $highscore['days'] . ':';
+    }
+    if ($highscore['hours'] > 0 || $time !== '') {
+        $time .= sprintf('%02d:', $highscore['hours']);
+    }
+    if ($highscore['minutes'] > 0 || $time !== '') {
+        $time .= sprintf('%02d:', $highscore['minutes']);
+    }
+    if ($highscore['seconds'] > 0 || $time !== '' || $allZero) {
+        $time .= sprintf('%02d:', $highscore['seconds']);
+    }
+     if ($allZero) {
+        $time .= "0:";
+    }
+
+    $time .= sprintf('%03d', $highscore['milliseconds']);
+
+
+    
+
+    // Remove days, hours, minutes, and seconds if they are 0
+    if ($highscore['days'] == 0 && $highscore['hours'] == 0 && $highscore['minutes'] == 0) {
+        $time = ltrim($time, '0:');
+         if ($highscore['seconds'] == 0) {
+                $time = '0:' . $time;
+         }
+
+    }
+
+    // Assign the formatted time back to the highscore
+    $highscore['time'] = $time;
+    // Remove unnecessary columns
+    unset($highscore['days'], $highscore['hours'], $highscore['minutes'], $highscore['seconds'], $highscore['milliseconds'], $highscore['total_milliseconds']);
+}
+
 
         $response['success'] = true;
         $response['highscores'] = $highscores;
