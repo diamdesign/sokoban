@@ -29,7 +29,9 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
         setDisableControls,
         currentPagination,
         setCurrentPagination,
+        mapCount,
         setMapFiles,
+        onPageChange,
     } = useContext(MyContext);
 
     const [highscoreDB, setHighscoreDB] = useState<any[]>([]);
@@ -152,6 +154,14 @@ export const Highscore: React.FC<HighScoreProps> = ({ counter, elapsedTime }) =>
         playSound('levelstart', 0.5);
 
         const nextLevel = level + 1;
+        console.log(nextLevel, mapCount);
+        if (nextLevel >= mapCount) {
+            alert('You have reached the end of levels for now. Make your own in the editor!');
+            onPageChange('start');
+            playSound('click', 0.25);
+            playSound('swoosh', 0.15);
+            return;
+        }
 
         // Fetch new maps every 20 levels
         if (nextLevel % 20 === 0) {

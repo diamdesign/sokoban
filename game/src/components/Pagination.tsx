@@ -16,10 +16,11 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ initialPage = 0, perPage = 20, mapEndpoint }) => {
-    const [mapCount, setMapCount] = useState(0);
     const [endIndex, setEndIndex] = useState(0);
     const [startIndex, setStartIndex] = useState(0);
     const {
+        mapCount,
+        setMapCount,
         resetGame,
         setLevel,
         setGameReady,

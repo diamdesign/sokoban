@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { MyContext } from '../ContextProvider/ContextProvider';
 
-import allMaps from '../maps/maps';
+/*import allMaps from '../maps/maps';*/
 import { formatElapsedTime } from '../utils/TimeUtils';
 import { playSound } from './../components/playSound';
 import { useContext } from 'react';
@@ -75,7 +75,7 @@ export function SelectLevel({ mapCount }: SelectLevelProps) {
             setPlayedMaps([]);
         }
     }, [setPlayedMaps]);
-
+    /*
     useEffect(() => {
         const mapFilesData: string[] = [];
         for (let i = 1; i <= allMaps.length; i++) {
@@ -85,6 +85,8 @@ export function SelectLevel({ mapCount }: SelectLevelProps) {
 
         setMapFiles(mapFilesData);
     }, [mapCount]);
+
+    */
     /*
     const handlePrevClick = () => {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));

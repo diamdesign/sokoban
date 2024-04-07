@@ -33,6 +33,8 @@ interface SolutionState {
     direction: string;
 }
 interface GameContextProps {
+    mapCount: number;
+    setMapCount: (mapCount: number) => void;
     mapFiles: string[][];
     setMapFiles: (mapFiles: string[][]) => void;
     currentPage: string;
@@ -144,6 +146,7 @@ interface ChildrenProps {
 export const MyContext = createContext({} as GameContextProps);
 
 export const GameContextProvider = ({ children }: ChildrenProps) => {
+    const [mapCount, setMapCount] = useState<number>(0);
     const [mapFiles, setMapFiles] = useState([]);
     const [currentPage, onPageChange] = useState<string>('start');
     const [alias, setAlias] = useState(localStorage.getItem('playerName') || null);
@@ -220,6 +223,8 @@ export const GameContextProvider = ({ children }: ChildrenProps) => {
     };
 
     const value: GameContextProps = {
+        mapCount,
+        setMapCount,
         currentPagnation: currentPagnation,
         setCurrentPagnation: setCurrentPagnation,
         mapFiles: mapFiles,
