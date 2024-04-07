@@ -378,6 +378,7 @@ export function MapGenerator() {
                                 alert(
                                     'Map has been saved into database. You can now play it, if you have managed to solve all other maps before it, it has been placed as the current last level.'
                                 );
+                                setWonGame(false);
                             } else if (result.exist) {
                                 alert('This exact map already exist.');
                                 return;
