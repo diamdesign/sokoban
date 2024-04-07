@@ -554,6 +554,7 @@ export function MapGenerator() {
         setMapGeneratorRendering(true);
         setGameReady(true);
         setIntroDone(false);
+        setWonGame(false);
     };
 
     const goBack = () => {
@@ -578,12 +579,17 @@ export function MapGenerator() {
         // setGameRunning(false);
         onPageChange('start');
     };
+
     useEffect(() => {
-        wonGame && setDisableControls(true);
-    }, [wonGame]);
+        if (wonGame && solution.length > 0) {
+            setDisableControls(true);
+        }
+    }, [wonGame, solution]);
+
     useEffect(() => {
         console.log(solution);
     }, [setDisableControls]);
+
     const handleClearButton = () => {
         playSound('reverse', 0.3);
         setGridItems(Array.from({ length: 10 }, () => new Array(10).fill('')));
@@ -610,6 +616,9 @@ export function MapGenerator() {
         <>
             {/* < div className="map-render"> */}
             <h1 className="createmapheader">Test</h1>
+            <h2 className="createmaph2">
+                If the map doesnt show directly, reset map in settings or by pressing 'R'
+            </h2>
             <MapRender initialMapData={savedMapData} />
             {wonGame && (
                 // <button

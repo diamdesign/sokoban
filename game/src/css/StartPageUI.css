@@ -1083,3 +1083,12 @@
 .listhdb .row div:last-child {
     text-align: right;
 }
+
+.createmaph2 {
+    color: white;
+    position: absolute;
+    top: 5rem;
+    max-width: 24rem;
+    text-align: center;
+    font-size: 1rem;
+}
