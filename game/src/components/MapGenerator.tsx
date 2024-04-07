@@ -373,7 +373,7 @@ export function MapGenerator() {
                     if (xhr.status === 200) {
                         try {
                             const result = JSON.parse(xhr.responseText);
-                            if (result.success) {
+                            if (result.status === 'success') {
                                 console.log('File saved successfully:', result.file);
                                 alert(
                                     'Map has been saved into database. You can now play it, if you have managed to solve all other maps before it, it has been placed as the current last level.'
